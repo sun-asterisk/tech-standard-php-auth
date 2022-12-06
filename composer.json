@@ -1,0 +1,19 @@
+{
+    "name": "sun-asterisk/auth",
+    "description": "PHP Auth",
+    "type": "library",
+    "autoload": {
+        "psr-4": {
+            "SunAsterisk\\Auth\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "TungPro",
+            "email": "nguyen.thanh.tung@sun-asterisk.com"
+        }
+    ],
+    "require": {
+        "php": ">=5.6.0",
+    }
+}
