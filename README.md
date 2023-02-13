@@ -5,6 +5,7 @@
 - [Lumen Installation](#lumen-installation)
 - [Other Installation](#other-installation)
 - [Quick start](#quick-start)
+- [Wiki](../../wiki)
 
 ## Overview
 
@@ -88,9 +89,8 @@ Route::post('refresh', 'AuthController@refresh');
 Route::post('login', 'AuthController@login');
 Route::post('register', 'AuthController@register');
 Route::post('forgot-password', 'AuthController@postForgotPassword');
-Route::post('new-password', 'AuthController@postNewPassword');
 Route::get('confirm', 'AuthController@confirm');
-Route::get('social/sign-in/{provider}', 'AuthController@socialSignIn');
+Route::post('new-password', 'AuthController@postNewPassword');
 ```
 
 ### Create the AuthController
