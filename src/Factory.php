@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 use SunAsterisk\Auth\Contracts;
 use SunAsterisk\Auth\Repository\EloquentRepository;
 use InvalidArgumentException;
+use SunAsterisk\Auth\AuthJWTService;
+use SunAsterisk\Auth\AuthSocialService;
 
 final class Factory
 {
