@@ -14,6 +14,11 @@ final class AuthSocialService implements Contracts\AuthSocialInterface
         //
     }
 
+    /**
+     * [socialSignIn]
+     * @param  string $provider                   [The Provider should received from https://socialiteproviders.com/about/]
+     * @return [Illuminate\Http\RedirectResponse]
+     */
     public function socialSignIn(?string $provider): RedirectResponse
     {
         try {
@@ -23,6 +28,11 @@ final class AuthSocialService implements Contracts\AuthSocialInterface
         }
     }
 
+    /**
+     * [socialCallback]
+     * @param  string $provider     [The Provider should received from https://socialiteproviders.com/about/]
+     * @return [stdClass]
+     */
     public function socialCallback(?string $provider): stdClass
     {
         try {
