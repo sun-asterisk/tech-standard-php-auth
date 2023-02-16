@@ -13,30 +13,46 @@ final class SunServiceProvider extends \Illuminate\Support\ServiceProvider
 {
     public function boot(): void
     {
-        // parent::boot();
-
         $this->publishes([
             __DIR__.'/../config/sun-asterisk.php' => $this->app->configPath('sun-asterisk.php'),
         ], 'sun-asterisk');
 
         $this->extendAuthGuard();
-        $this->socialiteServiceBoot();
+        if ($this->app->config->get('sun-asterisk.auth.enabled_social')) {
+            $this->socialiteServiceBoot();
+        }
     }
 
     public function register(): void
     {
         $this->mergeConfigFrom(__DIR__.'/../config/sun-asterisk.php', 'sun-asterisk');
 
+        $this->registerAuthJWT();
+
+        if ($this->app->config->get('sun-asterisk.auth.enabled_social')) {
+            $this->registerAuthSocial();
+            $this->registerSocialiteProviders();
+        }
+    }
+
+    protected function registerAuthJWT(): void
+    {
         $this->app->singleton(
             Contracts\AuthJWTInterface::class,
             static fn (Container $app) => $app->make(SunProjectManager::class)->authJWT(),
         );
+    }
 
+    protected function registerAuthSocial(): void
+    {
         $this->app->singleton(
             Contracts\AuthSocialInterface::class,
             static fn (Container $app) => $app->make(SunProjectManager::class)->authSocial(),
         );
+    }
 
+    protected function registerSocialiteProviders(): void
+    {
         $this->app->singleton(Factory::class, function ($app) {
             return new SocialiteManager($app);
         });
@@ -53,10 +69,12 @@ final class SunServiceProvider extends \Illuminate\Support\ServiceProvider
      *
      * @return void
      */
-    protected function extendAuthGuard()
+    protected function extendAuthGuard(): void
     {
         $this->app['auth']->extend('sun', function ($app, $name, array $config) {
-            $jwt = new SunJwt($this->app->config->get('sun-asterisk')['auth']);
+            $blackList = new SunBlacklist($app->make(Providers\Storage::class));
+            $jwt = new SunJWT($blackList, $app->config->get('sun-asterisk.auth'));
+
             $guard = new SunGuard(
                 $jwt,
                 $app['auth']->createUserProvider($config['provider']),
@@ -68,7 +86,7 @@ final class SunServiceProvider extends \Illuminate\Support\ServiceProvider
         });
     }
 
-    protected function socialiteServiceBoot()
+    protected function socialiteServiceBoot(): void
     {
         if ($this->app instanceof \Illuminate\Foundation\Application) {
             // Laravel

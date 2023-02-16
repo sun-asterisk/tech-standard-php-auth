@@ -7,8 +7,6 @@ use Illuminate\Contracts\Auth\UserProvider;
 use Illuminate\Auth\GuardHelpers;
 use Illuminate\Support\Traits\Macroable;
 use Illuminate\Http\Request;
-use SunAsterisk\Auth\SunJWT;
-use SunAsterisk\Auth\Exception\JWTException;
 
 class SunGuard implements Guard
 {
@@ -55,10 +53,25 @@ class SunGuard implements Guard
             $token = $this->request->bearerToken();
             $payload = $this->jwt->decode($token ?: '');
         } catch (\Exception $e) {
-            throw new JWTException('UnauthorizedException');
+            throw new Exceptions\UnauthorizedException($e->getMessage());
         }
 
         return $payload['sub'];
+    }
+
+    /**
+     * Logout the user, thus invalidating the token.
+     *
+     * @return void
+     */
+    public function logout()
+    {
+        try {
+            $token = $this->request->bearerToken();
+            $this->jwt->invalidate($token);
+        } catch (\Exception $e) {
+            throw new Exceptions\JWTException($e->getMessage());
+        }
     }
 
     /**

@@ -1,6 +1,6 @@
 <?php
 
-namespace SunAsterisk\Auth;
+namespace SunAsterisk\Auth\Services;
 
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Hash;
@@ -11,9 +11,9 @@ use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Str;
 use Illuminate\Support\Arr;
 use SunAsterisk\Auth\SunJWT;
+use SunAsterisk\Auth\Contracts;
+use SunAsterisk\Auth\Exceptions;
 use Carbon\Carbon;
-use SunAsterisk\Auth\Exception\AuthException;
-use SunAsterisk\Auth\Exception\JWTException;
 
 final class AuthJWTService implements Contracts\AuthJWTInterface
 {
@@ -21,11 +21,11 @@ final class AuthJWTService implements Contracts\AuthJWTInterface
     protected $jwt;
     private array $config = [];
 
-    public function __construct(Contracts\Repository $repository, array $config = [])
+    public function __construct(Contracts\RepositoryInterface $repository, SunJWT $jwt, array $config = [])
     {
         $this->repository = $repository;
         $this->config = $config;
-        $this->jwt = new SunJwt($config);
+        $this->jwt = $jwt;
     }
 
     /**
@@ -73,11 +73,6 @@ final class AuthJWTService implements Contracts\AuthJWTInterface
         ];
     }
 
-    public function logout()
-    {
-        //
-    }
-
     /**
      * [refresh]
      * @param  string $refreshToken     [refresh_token for user get access_token.]
@@ -89,14 +84,14 @@ final class AuthJWTService implements Contracts\AuthJWTInterface
         try {
             $payload = $this->jwt->decode($refreshToken ?: '', true);
             if (Carbon::createFromTimestamp($payload['exp'])->lte(Carbon::now())) {
-                throw new JWTException('The RefreshToken is invalid.');
+                throw new Exceptions\JWTException('The RefreshToken is invalid.');
             }
 
             $sub = $payload['sub'];
             // Verify user
             $item = $this->repository->findById($sub?->id);
             if (!$item) {
-                throw new JWTException('The RefreshToken is invalid.');
+                throw new Exceptions\JWTException('The RefreshToken is invalid.');
             }
             // TODO Revoke other token
 
@@ -114,7 +109,7 @@ final class AuthJWTService implements Contracts\AuthJWTInterface
                 'expires_at' => $payload['exp'],
             ];
         } catch (\Exception $e) {
-            throw new AuthException($e->getMessage());
+            throw new Exceptions\AuthException($e->getMessage());
         }
     }
 
@@ -165,7 +160,7 @@ final class AuthJWTService implements Contracts\AuthJWTInterface
     public function postForgotPassword(string $email, callable $callback = null): bool
     {
         if (!in_array('email', $this->repository->getFillable())) {
-            throw new AuthException('Model is have not the email attribute.');
+            throw new Exceptions\AuthException('Model is have not the email attribute.');
         }
         // Validate Email
         Validator::make(['email' => $email], [
@@ -227,7 +222,7 @@ final class AuthJWTService implements Contracts\AuthJWTInterface
 
             $user = $this->repository->findByAttribute(['id' => $userId]);
             if (!Hash::check($oldPassword, $user->{$this->passwd()})) {
-                throw new AuthException('Old password is invalid!');
+                throw new Exceptions\AuthException('Old password is invalid!');
             }
         }
 
@@ -258,19 +253,19 @@ final class AuthJWTService implements Contracts\AuthJWTInterface
             // Check user
             $item = $this->repository->findByAttribute(['id' => $obj['id']]);
             if (!$item) {
-                throw new AuthException('Token is invalid!');
+                throw new Exceptions\AuthException('Token is invalid!');
             }
             $diffSeconds = Carbon::now()->diffInSeconds(Carbon::createFromTimestamp($obj['created_at']));
 
             if ($diffSeconds >= $this->config['token_expires'] * 60) {
-                throw new AuthException('Token is invalid!');
+                throw new Exceptions\AuthException('Token is invalid!');
             }
 
             if (is_callable($callback)) {
                 call_user_func_array($callback, [$item]);
             }
         } catch (\Exception $e) {
-            throw new AuthException($e->getMessage());
+            throw new Exceptions\AuthException($e->getMessage());
         }
 
         return true;

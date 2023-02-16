@@ -1,11 +1,11 @@
 <?php
 
-namespace SunAsterisk\Auth\Repository;
+namespace SunAsterisk\Auth\Repositories;
 
 use Illuminate\Database\Eloquent\Model;
-use SunAsterisk\Auth\Contracts\Repository;
+use SunAsterisk\Auth\Contracts\RepositoryInterface;
 
-final class EloquentRepository implements Repository
+final class EloquentRepository implements RepositoryInterface
 {
     protected $model;
 

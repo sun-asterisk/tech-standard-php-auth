@@ -2,7 +2,7 @@
 
 namespace SunAsterisk\Auth\Contracts;
 
-interface Repository
+interface RepositoryInterface
 {
     /**
      * [create] Insert from params to database

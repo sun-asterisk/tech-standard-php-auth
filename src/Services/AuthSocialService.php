@@ -1,13 +1,14 @@
 <?php
 
-namespace SunAsterisk\Auth;
+namespace SunAsterisk\Auth\Services;
 
 use Illuminate\Http\RedirectResponse;
+use SunAsterisk\Auth\Contracts\AuthSocialInterface;
 use Laravel\Socialite\Facades\Socialite;
 use InvalidArgumentException;
 use stdClass;
 
-final class AuthSocialService implements Contracts\AuthSocialInterface
+final class AuthSocialService implements AuthSocialInterface
 {
     public function __construct()
     {
@@ -16,7 +17,7 @@ final class AuthSocialService implements Contracts\AuthSocialInterface
 
     /**
      * [socialSignIn]
-     * @param  string $provider                   [The Provider should received from https://socialiteproviders.com/about/]
+     * @param  string $provider [The Provider should received from https://socialiteproviders.com/about/]
      * @return [Illuminate\Http\RedirectResponse]
      */
     public function socialSignIn(?string $provider): RedirectResponse
@@ -30,7 +31,7 @@ final class AuthSocialService implements Contracts\AuthSocialInterface
 
     /**
      * [socialCallback]
-     * @param  string $provider     [The Provider should received from https://socialiteproviders.com/about/]
+     * @param  string $provider [The Provider should received from https://socialiteproviders.com/about/]
      * @return [stdClass]
      */
     public function socialCallback(?string $provider): stdClass
