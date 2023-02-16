@@ -5,20 +5,50 @@ namespace SunAsterisk\Auth;
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
 use Carbon\Carbon;
+use Illuminate\Support\Str;
 
 class SunJWT
 {
+    /**
+     * The TTL.
+     *
+     * @var int
+     */
     protected $ttl = 60;
 
+    /**
+     * [$jwtKey]
+     * @var string
+     */
     protected $jwtKey;
 
+    /**
+     * Number of minutes from issue date in which a JWT can be refreshed.
+     *
+     * @var int
+     */
     protected $rttl = 20160;
 
+    /**
+     * [$jwtRefreshKey]
+     * @var string
+     */
     protected $jwtRefreshKey;
 
+    /**
+     * [$payload]
+     * @var array
+     */
     protected $payload = [];
 
-    public function __construct(array $configs)
+    /**
+     * The blacklist.
+     *
+     * @var SunAsterisk\Auth\SunBlacklist
+     */
+    protected $blackList = null;
+
+    public function __construct(SunBlacklist $blacklist = null, array $configs)
     {
         if (isset($configs['jwt_ttl']) && is_numeric($configs['jwt_ttl'])) {
             $this->ttl = $configs['jwt_ttl'];
@@ -35,6 +65,8 @@ class SunJWT
         if (!empty($configs['jwt_refresh_key']) || getenv('APP_JWT_REFRESH_KEY')) {
             $this->jwtRefreshKey = getenv('APP_JWT_REFRESH_KEY') ?: $configs['jwt_refresh_key'];
         }
+
+        $this->blackList = $blacklist;
     }
 
     public function toArray(): array
@@ -49,16 +81,28 @@ class SunJWT
         return JWT::encode($payload, $key, 'HS256');
     }
 
-    public function decode(string $token, bool $isRefresh = false): array
+    public function decode(string $token, bool $isRefresh = false, $checkBlacklist = true): array
     {
         $key = $isRefresh ? $this->jwtRefreshKey : $this->jwtKey;
 
-        return (array) JWT::decode($token, new Key($key, 'HS256'));
+        $payload = (array) JWT::decode($token, new Key($key, 'HS256'));
+
+        if ($this->blackList && $checkBlacklist && $this->blackList->has($payload)) {
+            throw new Exceptions\JWTException('The token has been blacklisted.');
+        }
+
+        return $payload;
     }
 
-    public function invalidate(string $token)
+    public function invalidate(string $token, bool $isRefresh = false): bool
     {
-        //
+        if (! $this->blackList) {
+            throw new Exceptions\JWTException('You must have the blacklist enabled to invalidate a token.');
+        }
+
+        $payload = $this->decode($token, $isRefresh, false);
+
+        return $this->blackList->add($payload);
     }
 
     public function make(array $sub, $isRefresh = false): self
@@ -68,6 +112,7 @@ class SunJWT
             $this->payload = [
                 'sub' => $sub,
                 'iat' => $now->timestamp,
+                'jti' => Str::random(6) . $now->timestamp,
             ];
         }
 

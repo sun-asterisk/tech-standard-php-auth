@@ -2,7 +2,6 @@
 
 namespace SunAsterisk\Auth;
 
-use SunAsterisk\Auth\Contracts;
 use Illuminate\Contracts\Container\Container;
 
 class SunProjectManager
@@ -17,7 +16,10 @@ class SunProjectManager
     public function authJWT(): Contracts\AuthJWTInterface
     {
         $config = $this->app->config->get('sun-asterisk');
-        $factory = (new Factory)->withConfig($config);
+        $cacheProvider = $this->app->make(Providers\Storage::class);
+        $factory = (new Factory)
+            ->withConfig($config)
+            ->withBlacklist($cacheProvider);
 
         return $factory->createAuthJWT();
     }

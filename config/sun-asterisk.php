@@ -76,6 +76,15 @@ return [
         | E.g. '60'
         |
         */
-        'jwt_refresh_ttl' => 20160 // minutes,
+        'jwt_refresh_ttl' => 20160, // minutes
+        /*
+        |---------------------------------------------------------
+        | use Socialite Providers for social login
+        |---------------------------------------------------------
+        |
+        | Default false
+        |
+        */
+        'enabled_social' => false,
     ],
 ];

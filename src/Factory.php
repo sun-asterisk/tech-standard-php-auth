@@ -3,11 +3,7 @@
 namespace SunAsterisk\Auth;
 
 use Illuminate\Database\Eloquent\Model;
-use SunAsterisk\Auth\Contracts;
-use SunAsterisk\Auth\Repository\EloquentRepository;
 use InvalidArgumentException;
-use SunAsterisk\Auth\AuthJWTService;
-use SunAsterisk\Auth\AuthSocialService;
 
 final class Factory
 {
@@ -16,6 +12,11 @@ final class Factory
      */
     private array $config = [];
 
+    /**
+     * @var SunAsterisk\Auth\SunBlacklist
+     */
+    private $blackList = null;
+
     public function __construct()
     {
         //
@@ -23,10 +24,16 @@ final class Factory
 
     public function withConfig(array $config = []): self
     {
-        $factory = clone $this;
-        $factory->config = $config;
+        $this->config = $config;
 
-        return $factory;
+        return $this;
+    }
+
+    public function withBlacklist(Contracts\StorageInterface $storage): self
+    {
+        $this->blackList = new SunBlacklist($storage);
+
+        return $this;
     }
 
     public function createAuthJWT(): Contracts\AuthJWTInterface
@@ -42,8 +49,8 @@ final class Factory
 
         switch (true) {
             case $model instanceof Model:
-                // Eloquent of Laravel
-                $repository = new EloquentRepository($model);
+                // Eloquent of Laravel & lumen
+                $repository = new Repositories\EloquentRepository($model);
                 break;
             default:
                 // TODO
@@ -52,12 +59,14 @@ final class Factory
         if (!isset($repository)) {
             throw new InvalidArgumentException('Repository is invalid.');
         }
+        // Create JWT
+        $jwt = new SunJWT($this->blackList, $this->config['auth']);
 
-        return new AuthJWTService($repository, $this->config['auth']);
+        return new Services\AuthJWTService($repository, $jwt, $this->config['auth']);
     }
 
     public function createAuthSocial(): Contracts\AuthSocialInterface
     {
-        return new AuthSocialService();
+        return new Services\AuthSocialService();
     }
 }
