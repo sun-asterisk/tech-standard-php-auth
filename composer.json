@@ -2,6 +2,7 @@
     "name": "sun-asterisk/php-auth",
     "description": "Sun* Auth | PHP",
     "type": "library",
+    "license": "MIT",
     "autoload": {
         "psr-4": {
             "SunAsterisk\\Auth\\": "src/"
