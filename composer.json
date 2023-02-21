@@ -1,5 +1,5 @@
 {
-    "name": "sun-asterisk/auth",
+    "name": "sun-asterisk/php-auth",
     "description": "Sun* Auth | PHP",
     "type": "library",
     "autoload": {
