@@ -1,6 +1,6 @@
 {
     "name": "sun-asterisk/auth",
-    "description": "PHP Auth",
+    "description": "Sun* Auth | PHP",
     "type": "library",
     "autoload": {
         "psr-4": {
@@ -9,7 +9,7 @@
     },
     "authors": [
         {
-            "name": "TungPro",
+            "name": "Sun Asterisk",
             "email": "nguyen.thanh.tung@sun-asterisk.com"
         }
     ],
