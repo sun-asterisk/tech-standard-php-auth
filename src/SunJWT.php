@@ -105,6 +105,21 @@ class SunJWT
         return $this->blackList->add($payload);
     }
 
+    public function revoke(array $keys = []): bool
+    {
+        $exp = Carbon::now()->addMinutes($this->ttl)->timestamp;
+        foreach ($keys as $key) {
+            $payload = [
+                'exp' => $exp,
+                'jti' => $key,
+            ];
+
+            $this->blackList->add($payload);
+        }
+
+        return true;
+    }
+
     public function make(array $sub, $isRefresh = false): self
     {
         if (empty($this->payload)) {

@@ -22,6 +22,13 @@ interface AuthJWTInterface
     public function refresh(?string $refreshToken, callable $callback = null): array;
 
     /**
+     * [revoke]
+     * @param  array  $keys [keys were generated from each access token]
+     * @return [bool]
+     */
+    public function revoke(array $keys = []): bool;
+
+    /**
      * [register]
      * @param  array         $fields    [The user's attributes for register.]
      * @param  array         $rules     [The rules for register validate.]
