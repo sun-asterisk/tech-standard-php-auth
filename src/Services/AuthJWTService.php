@@ -51,14 +51,14 @@ final class AuthJWTService implements Contracts\AuthJWTInterface
 
         unset($item->password);
         $itemArr = $item->toArray();
-        if (is_callable($callback)) {
-            $itemArr = call_user_func_array($callback, [$item]);
-        }
 
         // Create jwt key
         $payload = $this->jwt->make($itemArr)->toArray();
         $payloadRefresh = $this->jwt->make($itemArr, true)->toArray();
 
+        if (is_callable($callback)) {
+            $itemArr = call_user_func_array($callback, [$item, $payload['jti']]);
+        }
         $jwt = $this->jwt->encode($payload);
         $refresh = $this->jwt->encode($payloadRefresh, true);
 
@@ -113,6 +113,17 @@ final class AuthJWTService implements Contracts\AuthJWTInterface
         }
     }
 
+    public function revoke(array $keys = []): bool
+    {
+        try {
+            return $this->jwt->revoke($keys);
+        } catch (\Exception $e) {
+            throw new Exceptions\JWTException('Revoke token is wrong.');
+        }
+
+        return false;
+    }
+
     /**
      * [register]
      * @param  array         $fields    [The user's attributes for register.]
@@ -134,7 +145,7 @@ final class AuthJWTService implements Contracts\AuthJWTInterface
             ];
 
             if (isset($params['email'])) {
-                $rules['email'] = ['required', 'string', "unique:{$table},email"];
+                $rules['email'] = ['required', 'email', "unique:{$table},email"];
             }
         }
 
@@ -166,12 +177,11 @@ final class AuthJWTService implements Contracts\AuthJWTInterface
         Validator::make(['email' => $email], [
             'email' => ['required', 'email'],
         ])->validate();
-
         // Check Email exists
         $item = $this->repository->findByAttribute(['email' => $email]);
         if (!$item) {
             throw ValidationException::withMessages([
-                'message' => 'The email is invalid.',
+                'message' => $this->getEmailInvalidMessage($email),
             ]);
         }
         // Generate Token
@@ -314,5 +324,12 @@ final class AuthJWTService implements Contracts\AuthJWTInterface
         return Lang::has('auth.failed')
             ? Lang::get('auth.failed')
             : 'These credentials do not match our records.';
+    }
+
+    protected function getEmailInvalidMessage(string $email = null): string
+    {
+        return Lang::has('validation.email')
+            ? Lang::get('validation.email', ['attribute' => $email])
+            : 'The email is invalid.';
     }
 }
