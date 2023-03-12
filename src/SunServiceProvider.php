@@ -29,6 +29,8 @@ final class SunServiceProvider extends \Illuminate\Support\ServiceProvider
 
         $this->registerAuthJWT();
 
+        $this->registerAuthSession();
+
         if ($this->app->config->get('sun-asterisk.auth.enabled_social')) {
             $this->registerAuthSocial();
             $this->registerSocialiteProviders();
@@ -40,6 +42,14 @@ final class SunServiceProvider extends \Illuminate\Support\ServiceProvider
         $this->app->singleton(
             Contracts\AuthJWTInterface::class,
             static fn (Container $app) => $app->make(SunProjectManager::class)->authJWT(),
+        );
+    }
+
+    protected function registerAuthSession(): void
+    {
+        $this->app->singleton(
+            Contracts\AuthSessionInterface::class,
+            static fn (Container $app) => $app->make(SunProjectManager::class)->authSession(),
         );
     }
 

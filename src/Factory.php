@@ -17,6 +17,11 @@ final class Factory
      */
     private $blackList = null;
 
+     /**
+     * @var guard
+     */
+    private $guard = null;
+
     public function __construct()
     {
         //
@@ -32,6 +37,13 @@ final class Factory
     public function withBlacklist(Contracts\StorageInterface $storage): self
     {
         $this->blackList = new SunBlacklist($storage);
+
+        return $this;
+    }
+
+    public function withGuard($guard): self
+    {
+        $this->guard = $guard;
 
         return $this;
     }
@@ -63,6 +75,38 @@ final class Factory
         $jwt = new SunJWT($this->blackList, $this->config['auth']);
 
         return new Services\AuthJWTService($repository, $jwt, $this->config['auth']);
+    }
+
+    public function createAuthSession(): Contracts\AuthSessionInterface
+    {
+        if (empty($this->config['auth'])) {
+            throw new InvalidArgumentException('Config is invalid.');
+        }
+        $model = $this->config['auth']['model'];
+
+        if (is_string($model) && class_exists($model)) {
+            $model = new $model();
+        }
+
+        switch (true) {
+            case $model instanceof Model:
+                // Eloquent of Laravel & lumen
+                $repository = new Repositories\EloquentRepository($model);
+                break;
+            default:
+                // TODO
+                break;
+        }
+        if (!isset($repository)) {
+            throw new InvalidArgumentException('Repository is invalid.');
+        }
+
+        // Create guard
+        if (!$this->guard) {
+            throw new InvalidArgumentException('guard is invalid.');
+        }
+
+        return new Services\AuthSessionService($repository, $this->guard, $this->config['auth']);
     }
 
     public function createAuthSocial(): Contracts\AuthSocialInterface
