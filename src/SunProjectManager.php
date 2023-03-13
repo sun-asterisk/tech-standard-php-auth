@@ -24,6 +24,19 @@ class SunProjectManager
         return $factory->createAuthJWT();
     }
 
+    public function authSession(): Contracts\AuthSessionInterface
+    {
+        $config = $this->app->config->get('sun-asterisk');
+
+        $auth = $this->app->get('auth');
+
+        $factory = (new Factory)
+            ->withConfig($config)
+            ->withGuard($auth->guard());
+
+        return $factory->createAuthSession();
+    }
+
     public function authSocial(): Contracts\AuthSocialInterface
     {
         $factory = new Factory();

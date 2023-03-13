@@ -17,8 +17,25 @@ use Carbon\Carbon;
 
 final class AuthJWTService implements Contracts\AuthJWTInterface
 {
+    /**
+     * The repository implementation.
+     *
+     * @var \SunAsterisk\Auth\Contracts\RepositoryInterface
+     */
     protected $repository;
+
+    /**
+     * The jwt implementation.
+     *
+     * @var \SunAsterisk\Auth\SunJWT
+     */
     protected $jwt;
+
+    /**
+     * The config implementation.
+     *
+     * @var array
+     */
     private array $config = [];
 
     public function __construct(Contracts\RepositoryInterface $repository, SunJWT $jwt, array $config = [])
@@ -326,6 +343,9 @@ final class AuthJWTService implements Contracts\AuthJWTInterface
             : 'These credentials do not match our records.';
     }
 
+    /**
+     * @return string|\Symfony\Component\Translation\TranslatorInterface
+     */
     protected function getEmailInvalidMessage(string $email = null): string
     {
         return Lang::has('validation.email')
