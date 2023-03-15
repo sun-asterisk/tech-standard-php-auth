@@ -6,6 +6,7 @@ use SunAsterisk\Auth\Contracts;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Lang;
+use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Arr;
 use Illuminate\Contracts\Auth\StatefulGuard;
@@ -58,7 +59,9 @@ final class AuthSessionService implements Contracts\AuthSessionInterface
         $item = $this->repository->findByAttribute($attributes);
 
         if (! $item || ! Hash::check(Arr::get($credentials, $this->passwd()), $item->{$this->passwd()})) {
-            return false;
+            throw ValidationException::withMessages([
+                $this->username() => $this->getFailedLoginMessage(),
+            ]);
         }
 
         if (is_callable($callback)) {
@@ -70,9 +73,65 @@ final class AuthSessionService implements Contracts\AuthSessionInterface
         return true;
     }
 
-    public function logout(): bool
+    /**
+     * [logout]
+     * @param  Illuminate\Http\Request $request [Request from controller]
+     * @return [void]
+     */
+    public function logout(Request $request): void
     {
         $this->guard->logout();
+
+        $request->session()->invalidate();
+
+        $request->session()->regenerateToken();
+    }
+
+    /**
+     * [register]
+     * @param  array         $fields    [The user's attributes for register.]
+     * @param  array         $rules     [The rules for register validate.]
+     * @param  callable|null $callback  [The callback function has the entity model.]
+     * @param  bool $setGuard  [The setGuard allow authenticated after register.]
+     * @return [array]
+     */
+    public function register(
+        array $params = [],
+        array $rules = [],
+        callable $callback = null,
+        bool $setGuard = false
+    ): bool {
+        $table = $this->repository->getTable();
+        if (empty($rules)) {
+            $rules = [
+                $this->username() => ['required', 'string', "unique:{$table}," . $this->username()],
+                $this->passwd() => [
+                    'required',
+                    'min:6',
+                    'regex:/^.*(?=.{3,})(?=.*[a-zA-Z])(?=.*[0-9])(?=.*[\d\x])(?=.*[!@#$%]).*$/',
+                ],
+            ];
+
+            if (isset($params['email'])) {
+                $rules['email'] = ['required', 'email', "unique:{$table},email"];
+            }
+        }
+
+        Validator::make($params, $rules)->validate();
+
+        $params[$this->passwd()] = Hash::make($params[$this->passwd()]);
+
+        $item = $this->repository->create($params);
+
+        if (is_callable($callback)) {
+            $itemArr = call_user_func_array($callback, [$item]);
+        }
+
+        if ($setGuard) {
+            $this->guard->login($item);
+        }
+
+        return true;
     }
 
     /**

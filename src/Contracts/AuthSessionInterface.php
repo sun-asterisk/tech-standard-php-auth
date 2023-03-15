@@ -2,9 +2,38 @@
 
 namespace SunAsterisk\Auth\Contracts;
 
+use Illuminate\Http\Request;
+
 interface AuthSessionInterface
 {
+    /**
+     * [login]
+     * @param  array         $credentials [The user's attributes for authentication.]
+     * @param  array|null    $attributes  [The attributes use when query.]
+     * @param  callable|null $callback    [The callback function has the entity model.]
+     * @return [bool]
+     */
     public function login(array $credentials = [], ?array $attributes = [], ?callable $callback = null): bool;
 
-    public function logout(): bool;
+    /**
+     * [logout]
+     * @param  Illuminate\Http\Request $request [Request from controller]
+     * @return [void]
+     */
+    public function logout(Request $request): void;
+
+    /**
+     * [register]
+     * @param  array         $fields    [The user's attributes for register.]
+     * @param  array         $rules     [The rules for register validate.]
+     * @param  callable|null $callback  [The callback function has the entity model.]
+     * @param  bool $setGuard  [The setGuard allow authenticated after register.]
+     * @return [array]
+     */
+    public function register(
+        array $params = [],
+        array $rules = [],
+        callable $callback = null,
+        bool $setGuard = false
+    ): bool;
 }
