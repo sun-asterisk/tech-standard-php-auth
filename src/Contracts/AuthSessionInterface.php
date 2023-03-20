@@ -9,11 +9,11 @@ interface AuthSessionInterface
     /**
      * [login]
      * @param  array         $credentials [The user's attributes for authentication.]
-     * @param  array|null    $attributes  [The attributes use when query.]
+     * @param  array|null    $conditions  [The conditions use when query.]
      * @param  callable|null $callback    [The callback function has the entity model.]
      * @return [bool]
      */
-    public function login(array $credentials = [], ?array $attributes = [], ?callable $callback = null): bool;
+    public function login(array $credentials = [], ?array $conditions = [], ?callable $callback = null): bool;
 
     /**
      * [logout]
@@ -36,4 +36,12 @@ interface AuthSessionInterface
         callable $callback = null,
         bool $setGuard = false
     ): bool;
+
+    /**
+     * [postForgotPassword]
+     * @param  string        $email     [The user's email for receive token.]
+     * @param  callable|null $callback  [The callback function have the token & entity model.]
+     * @return [bool]
+     */
+    public function postForgotPassword(string $email, callable $callback = null): bool;
 }
