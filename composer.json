@@ -8,6 +8,11 @@
             "SunAsterisk\\Auth\\": "src/"
         }
     },
+    "autoload-dev": {
+        "psr-4": {
+            "SunAsterisk\\Auth\\Tests\\": "tests/"
+        }
+    },
     "authors": [
         {
             "name": "Sun Asterisk",
@@ -24,5 +29,9 @@
         "illuminate/validation": "^8.0|^9.0|^10.0",
         "firebase/php-jwt": "^6.3",
         "socialiteproviders/manager": "^4.3"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^9.6",
+        "mockery/mockery": "^1.5"
     }
 }

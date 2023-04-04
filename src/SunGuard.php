@@ -3,14 +3,21 @@
 namespace SunAsterisk\Auth;
 
 use Illuminate\Contracts\Auth\Guard;
+use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
 use Illuminate\Contracts\Auth\UserProvider;
-use Illuminate\Auth\GuardHelpers;
 use Illuminate\Support\Traits\Macroable;
 use Illuminate\Http\Request;
 
 class SunGuard implements Guard
 {
-    use GuardHelpers, Macroable;
+    use Macroable;
+
+    /**
+     * The currently authenticated user.
+     *
+     * @var \Illuminate\Contracts\Auth\Authenticatable
+     */
+    protected $user;
 
     protected $jwt;
     /**
@@ -40,6 +47,98 @@ class SunGuard implements Guard
         $this->jwt = $jwt;
         $this->provider = $provider;
         $this->request = $request;
+    }
+
+    /**
+     * Determine if the current user is authenticated. If not, throw an exception.
+     *
+     * @return \Illuminate\Contracts\Auth\Authenticatable
+     *
+     * @throws \Illuminate\Auth\AuthenticationException
+     */
+    public function authenticate()
+    {
+        if (! is_null($user = $this->user())) {
+            return $user;
+        }
+
+        throw new AuthenticationException;
+    }
+
+    /**
+     * Determine if the guard has a user instance.
+     *
+     * @return bool
+     */
+    public function hasUser()
+    {
+        return ! is_null($this->user);
+    }
+
+    /**
+     * Determine if the current user is authenticated.
+     *
+     * @return bool
+     */
+    public function check()
+    {
+        return ! is_null($this->user());
+    }
+
+    /**
+     * Determine if the current user is a guest.
+     *
+     * @return bool
+     */
+    public function guest()
+    {
+        return ! $this->check();
+    }
+
+    /**
+     * Get the ID for the currently authenticated user.
+     *
+     * @return int|string|null
+     */
+    public function id()
+    {
+        if ($this->user()) {
+            return $this->user()->getAuthIdentifier();
+        }
+    }
+
+    /**
+     * Set the current user.
+     *
+     * @param  \Illuminate\Contracts\Auth\Authenticatable  $user
+     * @return $this
+     */
+    public function setUser(AuthenticatableContract $user)
+    {
+        $this->user = $user;
+
+        return $this;
+    }
+
+    /**
+     * Get the user provider used by the guard.
+     *
+     * @return \Illuminate\Contracts\Auth\UserProvider
+     */
+    public function getProvider()
+    {
+        return $this->provider;
+    }
+
+    /**
+     * Set the user provider used by the guard.
+     *
+     * @param  \Illuminate\Contracts\Auth\UserProvider  $provider
+     * @return void
+     */
+    public function setProvider(UserProvider $provider)
+    {
+        $this->provider = $provider;
     }
 
     /**

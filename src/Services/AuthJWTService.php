@@ -15,7 +15,7 @@ use SunAsterisk\Auth\Contracts;
 use SunAsterisk\Auth\Exceptions;
 use Carbon\Carbon;
 
-final class AuthJWTService implements Contracts\AuthJWTInterface
+class AuthJWTService implements Contracts\AuthJWTInterface
 {
     /**
      * The repository implementation.
@@ -141,8 +141,6 @@ final class AuthJWTService implements Contracts\AuthJWTInterface
         } catch (\Exception $e) {
             throw new Exceptions\JWTException('Revoke token is wrong.');
         }
-
-        return false;
     }
 
     /**
@@ -266,7 +264,7 @@ final class AuthJWTService implements Contracts\AuthJWTInterface
     }
 
     /**
-     * [verifyForgotPasswordToken]
+     * [verifyToken]
      * @param  string        $token     [The token from user's email.]
      * @param  callable|null $callback  [The callback function has the token & entity model.]
      * @return [bool]
