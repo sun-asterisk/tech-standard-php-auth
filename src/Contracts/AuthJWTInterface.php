@@ -7,11 +7,11 @@ interface AuthJWTInterface
     /**
      * [login]
      * @param  array         $credentials [The user's attributes for authentication.]
-     * @param  array|null    $attributes  [The attributes use when query.]
+     * @param  array|null    $conditions  [The conditions use when query.]
      * @param  callable|null $callback    [The callback function has the entity model.]
      * @return [array]
      */
-    public function login(array $credentials = [], ?array $attributes = [], ?callable $callback = null): array;
+    public function login(array $credentials = [], ?array $conditions = [], ?callable $callback = null): array;
 
     /**
      * [refresh]

@@ -1,5 +1,7 @@
 # Tech Standard PHP Auth
 
+[![CI](https://github.com/sun-asterisk/tech-standard-php-auth/actions/workflows/check_ci.yml/badge.svg)](https://github.com/sun-asterisk/tech-standard-php-auth/actions/workflows/check_ci.yml)
+
 ## Table of Contents
 - [Laravel Installation](#laravel-installation)
 - [Lumen Installation](#lumen-installation)

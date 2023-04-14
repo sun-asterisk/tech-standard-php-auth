@@ -15,7 +15,7 @@ use SunAsterisk\Auth\Contracts;
 use SunAsterisk\Auth\Exceptions;
 use Carbon\Carbon;
 
-final class AuthJWTService implements Contracts\AuthJWTInterface
+class AuthJWTService implements Contracts\AuthJWTInterface
 {
     /**
      * The repository implementation.
@@ -48,17 +48,21 @@ final class AuthJWTService implements Contracts\AuthJWTInterface
     /**
      * [login]
      * @param  array         $credentials [The user's attributes for authentication.]
-     * @param  array|null    $attributes  [The attributes use when query.]
+     * @param  array|null    $conditions  [The conditions use when query.]
      * @param  callable|null $callback    [The callback function has the entity model.]
      * @return [array]
      */
-    public function login(array $credentials = [], ?array $attributes = [], ?callable $callback = null): array
+    public function login(array $credentials = [], ?array $conditions = [], ?callable $callback = null): array
     {
         $this->loginValidator($credentials)->validate();
-        if (empty($attributes)) {
-            $attributes = Arr::only($credentials, $this->username());
+        $username = Arr::get($credentials, $this->username());
+
+        $fieldCredentials = [];
+        foreach ($this->fieldCredentials() as $field) {
+            $fieldCredentials[$field] = $username;
         }
-        $item = $this->repository->findByAttribute($attributes);
+
+        $item = $this->repository->findByCredentials($fieldCredentials, $conditions);
 
         if (! $item || ! Hash::check(Arr::get($credentials, $this->passwd()), $item->{$this->passwd()})) {
             throw ValidationException::withMessages([
@@ -137,8 +141,6 @@ final class AuthJWTService implements Contracts\AuthJWTInterface
         } catch (\Exception $e) {
             throw new Exceptions\JWTException('Revoke token is wrong.');
         }
-
-        return false;
     }
 
     /**
@@ -152,18 +154,14 @@ final class AuthJWTService implements Contracts\AuthJWTInterface
     {
         $table = $this->repository->getTable();
         if (empty($rules)) {
-            $rules = [
-                $this->username() => ['required', 'string', "unique:{$table}," . $this->username()],
-                $this->passwd() => [
-                    'required',
-                    'min:6',
-                    'regex:/^.*(?=.{3,})(?=.*[a-zA-Z])(?=.*[0-9])(?=.*[\d\x])(?=.*[!@#$%]).*$/',
-                ],
-            ];
-
-            if (isset($params['email'])) {
-                $rules['email'] = ['required', 'email', "unique:{$table},email"];
+            foreach ($this->fieldCredentials() as $field) {
+                $rules[$field] = ['required', 'string', "unique:{$table}," . $field];
             }
+            $rules[$this->passwd()] = [
+                'required',
+                'min:6',
+                'regex:/^.*(?=.{3,})(?=.*[a-zA-Z])(?=.*[0-9])(?=.*[\d\x])(?=.*[!@#$%]).*$/',
+            ];
         }
 
         Validator::make($params, $rules)->validate();
@@ -266,7 +264,7 @@ final class AuthJWTService implements Contracts\AuthJWTInterface
     }
 
     /**
-     * [verifyForgotPasswordToken]
+     * [verifyToken]
      * @param  string        $token     [The token from user's email.]
      * @param  callable|null $callback  [The callback function has the token & entity model.]
      * @return [bool]
@@ -311,6 +309,16 @@ final class AuthJWTService implements Contracts\AuthJWTInterface
             $this->username() => 'required',
             $this->passwd() => 'required',
         ]);
+    }
+
+    /**
+     * Get the field credential for check login.
+     *
+     * @return string
+     */
+    protected function fieldCredentials(): array
+    {
+        return $this->config['field_credentials'] ?? [];
     }
 
     /**

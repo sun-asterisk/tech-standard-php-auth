@@ -31,4 +31,12 @@ interface RepositoryInterface
      * @return [entity]
      */
     public function findByAttribute(array $attribute = []);
+
+    /**
+     * [findByCredentials]
+     * @param  array  $credentials
+     * @param  array  $conditions
+     * @return [entity]
+     */
+    public function findByCredentials(array $credentials = [], array $conditions = []);
 }

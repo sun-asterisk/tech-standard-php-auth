@@ -13,6 +13,17 @@ return [
         'login_username' => 'email',
         /*
         |---------------------------------------------------------
+        | Attribute field_credentials
+        |---------------------------------------------------------
+        | Use 1 of the list for authentication
+        | E.g. 'username or email or phone'
+        |
+        */
+        'field_credentials' => [
+            'email',
+        ],
+        /*
+        |---------------------------------------------------------
         | Attribute login
         |---------------------------------------------------------
         |

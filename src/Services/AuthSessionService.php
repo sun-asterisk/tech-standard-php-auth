@@ -6,9 +6,11 @@ use SunAsterisk\Auth\Contracts;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Lang;
+use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Arr;
 use Illuminate\Contracts\Auth\StatefulGuard;
+use SunAsterisk\Auth\Exceptions;
 use InvalidArgumentException;
 
 final class AuthSessionService implements Contracts\AuthSessionInterface
@@ -44,21 +46,27 @@ final class AuthSessionService implements Contracts\AuthSessionInterface
     /**
      * [login]
      * @param  array         $credentials [The user's attributes for authentication.]
-     * @param  array|null    $attributes  [The attributes use when query.]
+     * @param  array|null    $conditions  [The conditions use when query.]
      * @param  callable|null $callback    [The callback function has the entity model.]
      * @return [bool]
      */
-    public function login(array $credentials = [], ?array $attributes = [], ?callable $callback = null): bool
+    public function login(array $credentials = [], ?array $conditions = [], ?callable $callback = null): bool
     {
         $this->loginValidator($credentials)->validate();
         $hasRemember = $credentials['remember'] ?? false;
-        if (empty($attributes)) {
-            $attributes = Arr::only($credentials, $this->username());
+
+        $username = Arr::get($credentials, $this->username());
+        $fieldCredentials = [];
+        foreach ($this->fieldCredentials() as $field) {
+            $fieldCredentials[$field] = $username;
         }
-        $item = $this->repository->findByAttribute($attributes);
+
+        $item = $this->repository->findByCredentials($fieldCredentials, $conditions);
 
         if (! $item || ! Hash::check(Arr::get($credentials, $this->passwd()), $item->{$this->passwd()})) {
-            return false;
+            throw ValidationException::withMessages([
+                $this->username() => $this->getFailedLoginMessage(),
+            ]);
         }
 
         if (is_callable($callback)) {
@@ -70,9 +78,100 @@ final class AuthSessionService implements Contracts\AuthSessionInterface
         return true;
     }
 
-    public function logout(): bool
+    /**
+     * [logout]
+     * @param  Illuminate\Http\Request $request [Request from controller]
+     * @return [void]
+     */
+    public function logout(Request $request): void
     {
         $this->guard->logout();
+
+        $request->session()->invalidate();
+
+        $request->session()->regenerateToken();
+    }
+
+    /**
+     * [register]
+     * @param  array         $fields    [The user's attributes for register.]
+     * @param  array         $rules     [The rules for register validate.]
+     * @param  callable|null $callback  [The callback function has the entity model.]
+     * @param  bool $setGuard  [The setGuard allow authenticated after register.]
+     * @return [array]
+     */
+    public function register(
+        array $params = [],
+        array $rules = [],
+        callable $callback = null,
+        bool $setGuard = false
+    ): bool {
+        $table = $this->repository->getTable();
+        if (empty($rules)) {
+            foreach ($this->fieldCredentials() as $field) {
+                $rules[$field] = ['required', 'string', "unique:{$table}," . $field];
+            }
+
+            $rules[$this->passwd()] = [
+                'required',
+                'min:6',
+                'regex:/^.*(?=.{3,})(?=.*[a-zA-Z])(?=.*[0-9])(?=.*[\d\x])(?=.*[!@#$%]).*$/',
+            ];
+        }
+
+        Validator::make($params, $rules)->validate();
+
+        $params[$this->passwd()] = Hash::make($params[$this->passwd()]);
+
+        $item = $this->repository->create($params);
+
+        if (is_callable($callback)) {
+            $itemArr = call_user_func_array($callback, [$item]);
+        }
+
+        if ($setGuard) {
+            $this->guard->login($item);
+        }
+
+        return true;
+    }
+
+    /**
+     * [postForgotPassword]
+     * @param  string        $email     [The user's email for receive token.]
+     * @param  callable|null $callback  [The callback function have the token & entity model.]
+     * @return [bool]
+     */
+    public function postForgotPassword(string $email, callable $callback = null): bool
+    {
+        if (!in_array('email', $this->repository->getFillable())) {
+            throw new Exceptions\AuthException('Model is have not the email attribute.');
+        }
+        // Validate Email
+        Validator::make(['email' => $email], [
+            'email' => ['required', 'email'],
+        ])->validate();
+        // Check Email exists
+        $item = $this->repository->findByAttribute(['email' => $email]);
+        if (!$item) {
+            throw ValidationException::withMessages([
+                'email' => $this->getEmailInvalidMessage($email),
+            ]);
+        }
+
+        // Generate Token
+        $obj = [
+            'id' => $item->id,
+            'created_at' => Carbon::now()->timestamp,
+        ];
+
+        $token = Crypt::encryptString(json_encode($obj));
+
+        if (is_callable($callback)) {
+            call_user_func_array($callback, [$token, $item]);
+        }
+
+        return true;
     }
 
     /**
@@ -88,6 +187,16 @@ final class AuthSessionService implements Contracts\AuthSessionInterface
             $this->username() => 'required',
             $this->passwd() => 'required',
         ]);
+    }
+
+    /**
+     * Get the field credential for check login.
+     *
+     * @return string
+     */
+    protected function fieldCredentials(): array
+    {
+        return $this->config['field_credentials'] ?? [];
     }
 
     /**
@@ -118,5 +227,15 @@ final class AuthSessionService implements Contracts\AuthSessionInterface
         return Lang::has('auth.failed')
             ? Lang::get('auth.failed')
             : 'These credentials do not match our records.';
+    }
+
+    /**
+     * @return string|\Symfony\Component\Translation\TranslatorInterface
+     */
+    protected function getEmailInvalidMessage(string $email = null): string
+    {
+        return Lang::has('validation.email')
+            ? Lang::get('validation.email', ['attribute' => $email])
+            : 'The email is invalid.';
     }
 }

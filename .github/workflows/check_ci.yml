@@ -1,0 +1,54 @@
+name: Run PHP Unit Test
+
+on:
+  pull_request:
+    branches: [master, develop, php]
+
+jobs:
+  phpcs:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2 #https://github.com/shivammathur/setup-php
+        with:
+          php-version: 8.0
+          tools: phpcs
+      - name: Install PHP standard
+        run: |
+          git clone https://github.com/wataridori/framgia-php-codesniffer.git ~/squizlabs/php_codesniffer/src/Standards/Framgia
+          phpcs --config-set installed_paths ~/squizlabs/php_codesniffer/src/Standards/Framgia
+      - name: Run phpcs
+        run: |
+          phpcs --standard=Framgia src --encoding=utf-8
+
+  phpunit:
+    needs: [phpcs]
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2 #https://github.com/shivammathur/setup-php
+        with:
+          php-version: 8.0
+          tools: phpunit
+      - name: Get Composer Cache Directory
+        id: composer-cache
+        run: |
+          echo "::set-output name=dir::$(composer config cache-files-dir)"
+      - name: Cache Composer Downloads
+        uses: actions/cache@v1
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-composer-
+      - name: Cache PHP dependencies
+        uses: actions/cache@v1
+        with:
+          path: vendor
+          key: ${{ runner.OS }}-build-${{ hashFiles('**/composer.lock') }}
+      - name: Install dependencies
+        run: composer install --prefer-dist
+      - name: Run unit
+        run: php -dextension=pcov.so -dpcov.enabled=1 vendor/bin/phpunit --verbose
