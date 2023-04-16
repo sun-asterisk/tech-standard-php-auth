@@ -13,7 +13,7 @@ use Illuminate\Contracts\Auth\StatefulGuard;
 use SunAsterisk\Auth\Exceptions;
 use InvalidArgumentException;
 
-final class AuthSessionService implements Contracts\AuthSessionInterface
+class AuthSessionService implements Contracts\AuthSessionInterface
 {
     /**
      * The repository implementation.
@@ -131,44 +131,6 @@ final class AuthSessionService implements Contracts\AuthSessionInterface
 
         if ($setGuard) {
             $this->guard->login($item);
-        }
-
-        return true;
-    }
-
-    /**
-     * [postForgotPassword]
-     * @param  string        $email     [The user's email for receive token.]
-     * @param  callable|null $callback  [The callback function have the token & entity model.]
-     * @return [bool]
-     */
-    public function postForgotPassword(string $email, callable $callback = null): bool
-    {
-        if (!in_array('email', $this->repository->getFillable())) {
-            throw new Exceptions\AuthException('Model is have not the email attribute.');
-        }
-        // Validate Email
-        Validator::make(['email' => $email], [
-            'email' => ['required', 'email'],
-        ])->validate();
-        // Check Email exists
-        $item = $this->repository->findByAttribute(['email' => $email]);
-        if (!$item) {
-            throw ValidationException::withMessages([
-                'email' => $this->getEmailInvalidMessage($email),
-            ]);
-        }
-
-        // Generate Token
-        $obj = [
-            'id' => $item->id,
-            'created_at' => Carbon::now()->timestamp,
-        ];
-
-        $token = Crypt::encryptString(json_encode($obj));
-
-        if (is_callable($callback)) {
-            call_user_func_array($callback, [$token, $item]);
         }
 
         return true;
