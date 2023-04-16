@@ -15,6 +15,9 @@ use Illuminate\Support\Facades\Lang;
 use Carbon\Carbon;
 use Mockery;
 
+/**
+ * @covers \SunAsterisk\Auth\Services\AuthJWTService
+ */
 final class AuthJWTServiceTest extends TestCase
 {
     protected $repository;
@@ -33,9 +36,6 @@ final class AuthJWTServiceTest extends TestCase
         Mockery::close();
     }
 
-    /**
-     * @covers AuthJWTService::login
-     */
     public function test_login_exception()
     {
         $service = $this->getMockBuilder(AuthJWTService::class)
@@ -79,9 +79,6 @@ final class AuthJWTServiceTest extends TestCase
         );
     }
 
-    /**
-     * @covers AuthJWTService::login
-     */
     public function test_login_success()
     {
         $service = $this->getMockBuilder(AuthJWTService::class)
@@ -153,9 +150,6 @@ final class AuthJWTServiceTest extends TestCase
         $this->assertTrue($expected === $actual);
     }
 
-    /**
-     * @covers AuthJWTService::refresh
-     */
     public function test_refresh_exception()
     {
         $service = $this->getMockBuilder(AuthJWTService::class)
@@ -175,9 +169,6 @@ final class AuthJWTServiceTest extends TestCase
         $service->refresh('');
     }
 
-    /**
-     * @covers AuthJWTService::refresh
-     */
     public function test_refresh_payload_exception()
     {
         $service = $this->getMockBuilder(AuthJWTService::class)
@@ -199,9 +190,6 @@ final class AuthJWTServiceTest extends TestCase
         $service->refresh('');
     }
 
-    /**
-     * @covers AuthJWTService::refresh
-     */
     public function test_refresh_item_exception()
     {
         $service = $this->getMockBuilder(AuthJWTService::class)
@@ -231,9 +219,6 @@ final class AuthJWTServiceTest extends TestCase
         $service->refresh('');
     }
 
-    /**
-     * @covers AuthJWTService::refresh
-     */
     public function test_refresh_success()
     {
         $service = $this->getMockBuilder(AuthJWTService::class)
@@ -273,9 +258,6 @@ final class AuthJWTServiceTest extends TestCase
         $this->assertTrue($expected === $actual);
     }
 
-    /**
-     * @covers AuthJWTService::revoke
-     */
     public function test_revoke_exception()
     {
         $service = $this->getMockBuilder(AuthJWTService::class)
@@ -295,9 +277,6 @@ final class AuthJWTServiceTest extends TestCase
         $service->revoke([]);
     }
 
-    /**
-     * @covers AuthJWTService::revoke
-     */
     public function test_revoke_success()
     {
         $service = $this->getMockBuilder(AuthJWTService::class)
@@ -314,9 +293,6 @@ final class AuthJWTServiceTest extends TestCase
         $this->assertTrue($service->revoke([]));
     }
 
-    /**
-     * @covers AuthJWTService::register
-     */
     public function test_register()
     {
         $service = $this->getMockBuilder(AuthJWTService::class)
@@ -373,9 +349,6 @@ final class AuthJWTServiceTest extends TestCase
         $this->assertTrue($expected === $actual);
     }
 
-    /**
-     * @covers AuthJWTService::postForgotPassword
-     */
     public function test_post_forgot_password_email_exception()
     {
         $service = $this->getMockBuilder(AuthJWTService::class)
@@ -398,9 +371,6 @@ final class AuthJWTServiceTest extends TestCase
         $service->postForgotPassword('email');
     }
 
-    /**
-     * @covers AuthJWTService::postForgotPassword
-     */
     public function test_post_forgot_password_model_exception()
     {
         $service = $this->getMockBuilder(AuthJWTService::class)
@@ -431,9 +401,6 @@ final class AuthJWTServiceTest extends TestCase
         $service->postForgotPassword('email');
     }
 
-    /**
-     * @covers AuthJWTService::postForgotPassword
-     */
     public function test_post_forgot_password_success()
     {
         $service = $this->getMockBuilder(AuthJWTService::class)
@@ -464,9 +431,6 @@ final class AuthJWTServiceTest extends TestCase
         $this->assertTrue($service->postForgotPassword('email', function () {}));
     }
 
-    /**
-     * @covers AuthJWTService::changePassword
-     */
     public function test_change_password_item_exception()
     {
         $service = $this->getMockBuilder(AuthJWTService::class)
@@ -511,9 +475,6 @@ final class AuthJWTServiceTest extends TestCase
         $this->assertTrue($actual);
     }
 
-    /**
-     * @covers AuthJWTService::changePassword
-     */
     public function test_change_password_user_id_exception()
     {
         $service = $this->getMockBuilder(AuthJWTService::class)
@@ -549,9 +510,6 @@ final class AuthJWTServiceTest extends TestCase
         ], 1, function () {});
     }
 
-    /**
-     * @covers AuthJWTService::verifyToken
-     */
     public function test_verify_token_item_exception()
     {
         $service = $this->getMockBuilder(AuthJWTService::class)
@@ -577,9 +535,6 @@ final class AuthJWTServiceTest extends TestCase
         $actual = $service->verifyToken('token', function () {});
     }
 
-    /**
-     * @covers AuthJWTService::verifyToken
-     */
     public function test_verify_token_token_expires_exception()
     {
         $service = $this->getMockBuilder(AuthJWTService::class)
@@ -610,9 +565,6 @@ final class AuthJWTServiceTest extends TestCase
         $actual = $service->verifyToken('token', function () {});
     }
 
-    /**
-     * @covers AuthJWTService::verifyToken
-     */
     public function test_verify_token_exception()
     {
         $service = $this->getMockBuilder(AuthJWTService::class)
@@ -632,9 +584,6 @@ final class AuthJWTServiceTest extends TestCase
         $actual = $service->verifyToken('token', function () {});
     }
 
-    /**
-     * @covers AuthJWTService::verifyToken
-     */
     public function test_verify_token_success()
     {
         $service = $this->getMockBuilder(AuthJWTService::class)
@@ -664,9 +613,6 @@ final class AuthJWTServiceTest extends TestCase
         $this->assertTrue($actual);
     }
 
-    /**
-     * @covers AuthJWTService::loginValidator
-     */
     public function test_login_validator()
     {
         $service = $this->getMockBuilder(AuthJWTService::class)
@@ -701,9 +647,6 @@ final class AuthJWTServiceTest extends TestCase
         $this->assertNull(null);
     }
 
-    /**
-     * @covers AuthJWTService::fieldCredentials
-     */
     public function test_field_credentials()
     {
         $service = $this->getMockBuilder(AuthJWTService::class)
@@ -719,9 +662,6 @@ final class AuthJWTServiceTest extends TestCase
         $this->assertEquals($equal, ['field']);
     }
 
-    /**
-     * @covers AuthJWTService::username
-     */
     public function test_username()
     {
         $service = $this->getMockBuilder(AuthJWTService::class)
@@ -737,9 +677,6 @@ final class AuthJWTServiceTest extends TestCase
         $this->assertEquals($equal, 'username');
     }
 
-    /**
-     * @covers AuthJWTService::passwd
-     */
     public function test_passwd()
     {
         $service = $this->getMockBuilder(AuthJWTService::class)
@@ -755,9 +692,6 @@ final class AuthJWTServiceTest extends TestCase
         $this->assertEquals($equal, 'password');
     }
 
-    /**
-     * @covers AuthJWTService::getFailedLoginMessage
-     */
     public function test_get_failed_login_message_not_has()
     {
         $service = $this->getMockBuilder(AuthJWTService::class)
@@ -774,9 +708,6 @@ final class AuthJWTServiceTest extends TestCase
         $this->assertEquals($equal, 'These credentials do not match our records.');
     }
 
-    /**
-     * @covers AuthJWTService::getFailedLoginMessage
-     */
     public function test_get_failed_login_message_has()
     {
         $service = $this->getMockBuilder(AuthJWTService::class)
@@ -794,9 +725,6 @@ final class AuthJWTServiceTest extends TestCase
         $this->assertEquals($equal, 'auth_failed');
     }
 
-    /**
-     * @covers AuthJWTService::getEmailInvalidMessage
-     */
     public function test_get_email_invalid_message_not_has()
     {
         $service = $this->getMockBuilder(AuthJWTService::class)
@@ -813,9 +741,6 @@ final class AuthJWTServiceTest extends TestCase
         $this->assertEquals($equal, 'The email is invalid.');
     }
 
-    /**
-     * @covers AuthJWTService::getEmailInvalidMessage
-     */
     public function test_get_email_invalid_message_has()
     {
         $service = $this->getMockBuilder(AuthJWTService::class)

@@ -36,12 +36,4 @@ interface AuthSessionInterface
         callable $callback = null,
         bool $setGuard = false
     ): bool;
-
-    /**
-     * [postForgotPassword]
-     * @param  string        $email     [The user's email for receive token.]
-     * @param  callable|null $callback  [The callback function have the token & entity model.]
-     * @return [bool]
-     */
-    public function postForgotPassword(string $email, callable $callback = null): bool;
 }
