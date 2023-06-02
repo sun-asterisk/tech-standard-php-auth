@@ -141,6 +141,8 @@ class AuthController extends Controller
      */
     public function logout(Request $request)
     {
+        auth('api')->logout();
+
         return response()->noContent();
     }
 
@@ -268,3 +270,5 @@ class AuthController extends Controller
 }
 
 ```
+
+## For more details please see detailed explanation in the [Wiki](https://github.com/sun-asterisk/tech-standard-php-auth/wiki)
