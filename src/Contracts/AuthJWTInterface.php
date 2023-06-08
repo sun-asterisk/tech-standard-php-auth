@@ -61,4 +61,12 @@ interface AuthJWTInterface
      * @return [bool]
      */
     public function verifyToken(string $token, callable $callback = null): bool;
+
+    /**
+     * Invalidate a token.
+     * @param  string $token The user token
+     * @param  bool   $isRefresh True if the token is a refresh token
+     * @return bool
+     */
+    public function invalidate(string $token, bool $isRefresh = false): bool;
 }

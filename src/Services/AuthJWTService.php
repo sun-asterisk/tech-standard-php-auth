@@ -297,6 +297,20 @@ class AuthJWTService implements Contracts\AuthJWTInterface
     }
 
     /**
+     * Invalidate a token.
+     * @param  string $token The user token
+     * @param  bool   $isRefresh True if the token is a refresh token
+     * @return bool
+     */
+    public function invalidate(string $token, bool $isRefresh = false): bool {
+        if (empty($token)) {
+            return true;
+        }
+
+        return $this->jwt->invalidate($token, $isRefresh);
+    }
+
+    /**
      * Get a validator for an incoming login request.
      *
      * @param array $data
