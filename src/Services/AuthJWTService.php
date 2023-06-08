@@ -302,7 +302,8 @@ class AuthJWTService implements Contracts\AuthJWTInterface
      * @param  bool   $isRefresh True if the token is a refresh token
      * @return bool
      */
-    public function invalidate(string $token, bool $isRefresh = false): bool {
+    public function invalidate(string $token, bool $isRefresh = false): bool
+    {
         if (empty($token)) {
             return true;
         }
