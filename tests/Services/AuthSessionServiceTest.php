@@ -47,6 +47,7 @@ final class AuthSessionServiceTest extends TestCase
                 'loginValidator',
                 'username',
                 'fieldCredentials',
+                'payloads',
             ])
             ->getMock();
 
@@ -63,6 +64,10 @@ final class AuthSessionServiceTest extends TestCase
         $service->expects($this->any())
             ->method('fieldCredentials')
             ->willReturn(['email']);
+
+        $service->expects($this->any())
+            ->method('payloads')
+            ->willReturn(['id', 'email', 'password']);
 
         $this->repository
             ->shouldReceive('findByCredentials')
@@ -90,6 +95,7 @@ final class AuthSessionServiceTest extends TestCase
                 'username',
                 'passwd',
                 'fieldCredentials',
+                'payloads',
             ])
             ->getMock();
 
@@ -102,6 +108,7 @@ final class AuthSessionServiceTest extends TestCase
         $service->expects($this->any())
             ->method('username')
             ->willReturn('username');
+
         $service->expects($this->any())
             ->method('passwd')
             ->willReturn('passwd');
@@ -110,6 +117,10 @@ final class AuthSessionServiceTest extends TestCase
             ->method('fieldCredentials')
             ->willReturn(['email']);
 
+        $service->expects($this->any())
+            ->method('payloads')
+            ->willReturn(['id', 'email', 'password']);
+    
         $model = Mockery::mock(Authenticatable::class)->makePartial();
         $model->passwd = '';
         Hash::shouldReceive('check')->once()->andReturn(true);

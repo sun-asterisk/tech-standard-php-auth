@@ -89,6 +89,7 @@ final class EloquentRepositoryTest extends TestCase
 
             return true;
         }))->once()->andReturn($this->model);
+        $this->model->shouldReceive('select')->andReturn($this->model);
         $this->model->shouldReceive('where')->with([])->once()->andReturn($this->model);
         $this->model->shouldReceive('first')->once()->andReturn($expected);
         $actual = $eloquent->findByCredentials(['key' => 'value'], []);
