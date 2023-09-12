@@ -61,8 +61,9 @@ class AuthJWTService implements Contracts\AuthJWTInterface
         foreach ($this->fieldCredentials() as $field) {
             $fieldCredentials[$field] = $username;
         }
+        $columns = $this->payloads();
 
-        $item = $this->repository->findByCredentials($fieldCredentials, $conditions);
+        $item = $this->repository->findByCredentials($fieldCredentials, $conditions, $columns);
 
         if (! $item || ! Hash::check(Arr::get($credentials, $this->passwd()), $item->{$this->passwd()})) {
             throw ValidationException::withMessages([
@@ -329,11 +330,21 @@ class AuthJWTService implements Contracts\AuthJWTInterface
     /**
      * Get the field credential for check login.
      *
-     * @return string
+     * @return array
      */
     protected function fieldCredentials(): array
     {
         return $this->config['field_credentials'] ?? [];
+    }
+
+    /**
+     * Get the field column for get info check login.
+     *
+     * @return array
+     */
+    protected function payloads(): array
+    {
+        return $this->config['payloads'] ?? [];
     }
 
     /**

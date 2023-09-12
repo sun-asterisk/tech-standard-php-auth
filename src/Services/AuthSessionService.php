@@ -60,8 +60,9 @@ class AuthSessionService implements Contracts\AuthSessionInterface
         foreach ($this->fieldCredentials() as $field) {
             $fieldCredentials[$field] = $username;
         }
+        $columns = $this->payloads();
 
-        $item = $this->repository->findByCredentials($fieldCredentials, $conditions);
+        $item = $this->repository->findByCredentials($fieldCredentials, $conditions, $columns);
 
         if (! $item || ! Hash::check(Arr::get($credentials, $this->passwd()), $item->{$this->passwd()})) {
             throw ValidationException::withMessages([
