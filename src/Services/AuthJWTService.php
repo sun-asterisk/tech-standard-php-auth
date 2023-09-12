@@ -61,7 +61,7 @@ class AuthJWTService implements Contracts\AuthJWTInterface
         foreach ($this->fieldCredentials() as $field) {
             $fieldCredentials[$field] = $username;
         }
-        $columns = $this->payloads();
+        $columns = $this->payloadCredentials();
 
         $item = $this->repository->findByCredentials($fieldCredentials, $conditions, $columns);
 
@@ -342,9 +342,9 @@ class AuthJWTService implements Contracts\AuthJWTInterface
      *
      * @return array
      */
-    protected function payloads(): array
+    protected function payloadCredentials(): array
     {
-        return $this->config['payloads'] ?? [];
+        return $this->config['payload_credentials'] ?? [];
     }
 
     /**

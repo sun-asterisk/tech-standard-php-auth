@@ -60,7 +60,7 @@ class AuthSessionService implements Contracts\AuthSessionInterface
         foreach ($this->fieldCredentials() as $field) {
             $fieldCredentials[$field] = $username;
         }
-        $columns = $this->payloads();
+        $columns = $this->payloadCredentials();
 
         $item = $this->repository->findByCredentials($fieldCredentials, $conditions, $columns);
 
@@ -155,11 +155,21 @@ class AuthSessionService implements Contracts\AuthSessionInterface
     /**
      * Get the field credential for check login.
      *
-     * @return string
+     * @return array
      */
     protected function fieldCredentials(): array
     {
         return $this->config['field_credentials'] ?? [];
+    }
+
+    /**
+     * Get the field column for get info check login.
+     *
+     * @return array
+     */
+    protected function payloadCredentials(): array
+    {
+        return $this->config['payload_credentials'] ?? [];
     }
 
     /**

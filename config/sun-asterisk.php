@@ -24,16 +24,17 @@ return [
         ],
         /*
         |---------------------------------------------------------
-        | Attribute field_payload
+        | Attribute field_payload_credentials
         |---------------------------------------------------------
         | Use 1 of the list for select info users table
+        | 
         | E.g. 'id or email'
         |
         */
-        'payloads' => [
+        'payload_credentials' => [
             'id',
             'email',
-            'password',
+            'password', // The password field is required to get data to check login
         ],
         /*
         |---------------------------------------------------------

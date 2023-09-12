@@ -42,7 +42,7 @@ final class EloquentRepository implements RepositoryInterface
     public function findByCredentials(array $credentials = [], array $conditions = [], array $columns = ['id'])
     {
         return $this->model
-            -> select($columns)
+            ->select($columns)
             ->where(function ($query) use ($credentials) {
                 foreach ($credentials as $key => $value) {
                     $query->orWhere($key, $value);

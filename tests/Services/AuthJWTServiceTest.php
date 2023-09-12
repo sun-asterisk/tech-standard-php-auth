@@ -48,7 +48,7 @@ final class AuthJWTServiceTest extends TestCase
                 'loginValidator',
                 'username',
                 'fieldCredentials',
-                'payloads',
+                'payloadCredentials',
             ])
             ->getMock();
 
@@ -67,13 +67,13 @@ final class AuthJWTServiceTest extends TestCase
             ->willReturn(['email']);
 
         $service->expects($this->any())
-            ->method('payloads')
+            ->method('payloadCredentials')
             ->willReturn(['id', 'email', 'password']);
 
         $this->repository
             ->shouldReceive('findByCredentials')
             ->once()
-            ->with(['email' => 'username_val'], [])
+            ->with(['email' => 'username_val'], [], ['id', 'email', 'password'])
             ->andReturn(null);
         $this->expectException(\RuntimeException::class);
         $this->expectExceptionMessage('A facade root has not been set.');
@@ -97,7 +97,7 @@ final class AuthJWTServiceTest extends TestCase
                 'username',
                 'passwd',
                 'fieldCredentials',
-                'payloads',
+                'payloadCredentials',
             ])
             ->getMock();
 
@@ -120,7 +120,7 @@ final class AuthJWTServiceTest extends TestCase
             ->willReturn(['email']);
         
         $service->expects($this->any())
-            ->method('payloads')
+            ->method('payloadCredentials')
             ->willReturn(['id', 'email', 'password']);
 
         $model = Mockery::mock(Model::class)->makePartial();
@@ -136,7 +136,7 @@ final class AuthJWTServiceTest extends TestCase
         $this->repository
             ->shouldReceive('findByCredentials')
             ->once()
-            ->with(['email' => 'username_val'], [])
+            ->with(['email' => 'username_val'], [], ['id', 'email', 'password'])
             ->andReturn($model);
 
         $actual = $service->login(
