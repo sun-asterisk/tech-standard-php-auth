@@ -154,7 +154,7 @@ class AuthSessionService implements Contracts\AuthSessionInterface
     /**
      * Get the field credential for check login.
      *
-     * @return string
+     * @return array
      */
     protected function fieldCredentials(): array
     {

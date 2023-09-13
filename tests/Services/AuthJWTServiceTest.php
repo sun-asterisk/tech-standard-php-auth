@@ -48,6 +48,7 @@ final class AuthJWTServiceTest extends TestCase
                 'loginValidator',
                 'username',
                 'fieldCredentials',
+                'payloadCredentials',
             ])
             ->getMock();
 
@@ -64,6 +65,10 @@ final class AuthJWTServiceTest extends TestCase
         $service->expects($this->any())
             ->method('fieldCredentials')
             ->willReturn(['email']);
+
+        $service->expects($this->any())
+            ->method('payloadCredentials')
+            ->willReturn(['id', 'email', 'password']);
 
         $this->repository
             ->shouldReceive('findByCredentials')
@@ -92,6 +97,7 @@ final class AuthJWTServiceTest extends TestCase
                 'username',
                 'passwd',
                 'fieldCredentials',
+                'payloadCredentials',
             ])
             ->getMock();
 
@@ -104,6 +110,7 @@ final class AuthJWTServiceTest extends TestCase
         $service->expects($this->any())
             ->method('username')
             ->willReturn('username');
+
         $service->expects($this->any())
             ->method('passwd')
             ->willReturn('passwd');
@@ -111,8 +118,18 @@ final class AuthJWTServiceTest extends TestCase
         $service->expects($this->any())
             ->method('fieldCredentials')
             ->willReturn(['email']);
+        
+        $service->expects($this->any())
+            ->method('payloadCredentials')
+            ->willReturn(['id', 'email']);
 
         $model = Mockery::mock(Model::class)->makePartial();
+        $model->shouldReceive('getAttributes')
+            ->once()
+            ->andReturn([
+                'id' => 1, 
+                'email' => 'email',
+            ]);
         Hash::shouldReceive('check')->once()->andReturn(true);
         $this->jwt->shouldReceive('make->toArray')->twice()->andReturn(
             [

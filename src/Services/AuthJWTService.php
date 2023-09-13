@@ -73,9 +73,19 @@ class AuthJWTService implements Contracts\AuthJWTInterface
         unset($item->password);
         $itemArr = $item->toArray();
 
+        $tokenPayload = [];
+        foreach ($this->tokenPayloadFields() as $tokenPayloadField) {
+            if (!$itemArr[$tokenPayloadField]) {
+                throw ValidationException::withMessages([
+                    'message' => $this->getFailedLoginMessage(),
+                ]);
+            }
+            $tokenPayload[$tokenPayloadField] = $itemArr[$tokenPayloadField];
+        }
+
         // Create jwt key
-        $payload = $this->jwt->make($itemArr)->toArray();
-        $payloadRefresh = $this->jwt->make($itemArr, true)->toArray();
+        $payload = $this->jwt->make($tokenPayload)->toArray();
+        $payloadRefresh = $this->jwt->make($tokenPayload, true)->toArray();
 
         if (is_callable($callback)) {
             $itemArr = call_user_func_array($callback, [$item, $payload['jti']]);
@@ -329,11 +339,21 @@ class AuthJWTService implements Contracts\AuthJWTInterface
     /**
      * Get the field credential for check login.
      *
-     * @return string
+     * @return array
      */
     protected function fieldCredentials(): array
     {
         return $this->config['field_credentials'] ?? [];
+    }
+
+    /**
+     * Get the field column for get info check login.
+     *
+     * @return array
+     */
+    protected function tokenPayloadFields(): array
+    {
+        return $this->config['token_payload_fields'] ?? ['id'];
     }
 
     /**

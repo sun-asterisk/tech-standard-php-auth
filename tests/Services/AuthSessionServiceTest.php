@@ -102,6 +102,7 @@ final class AuthSessionServiceTest extends TestCase
         $service->expects($this->any())
             ->method('username')
             ->willReturn('username');
+
         $service->expects($this->any())
             ->method('passwd')
             ->willReturn('passwd');
