@@ -60,9 +60,8 @@ class AuthSessionService implements Contracts\AuthSessionInterface
         foreach ($this->fieldCredentials() as $field) {
             $fieldCredentials[$field] = $username;
         }
-        $columns = $this->payloadCredentials();
 
-        $item = $this->repository->findByCredentials($fieldCredentials, $conditions, $columns);
+        $item = $this->repository->findByCredentials($fieldCredentials, $conditions);
 
         if (! $item || ! Hash::check(Arr::get($credentials, $this->passwd()), $item->{$this->passwd()})) {
             throw ValidationException::withMessages([
@@ -160,16 +159,6 @@ class AuthSessionService implements Contracts\AuthSessionInterface
     protected function fieldCredentials(): array
     {
         return $this->config['field_credentials'] ?? [];
-    }
-
-    /**
-     * Get the field column for get info check login.
-     *
-     * @return array
-     */
-    protected function payloadCredentials(): array
-    {
-        return $this->config['payload_credentials'] ?? [];
     }
 
     /**

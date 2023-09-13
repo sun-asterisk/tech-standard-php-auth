@@ -39,5 +39,5 @@ interface RepositoryInterface
      * @param  array  $columns
      * @return [entity]
      */
-    public function findByCredentials(array $credentials = [], array $conditions = [], array $columns = ['id']);
+    public function findByCredentials(array $credentials = [], array $conditions = [], array $columns = ['*']);
 }

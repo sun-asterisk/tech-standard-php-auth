@@ -61,9 +61,8 @@ class AuthJWTService implements Contracts\AuthJWTInterface
         foreach ($this->fieldCredentials() as $field) {
             $fieldCredentials[$field] = $username;
         }
-        $columns = $this->payloadCredentials();
 
-        $item = $this->repository->findByCredentials($fieldCredentials, $conditions, $columns);
+        $item = $this->repository->findByCredentials($fieldCredentials, $conditions);
 
         if (! $item || ! Hash::check(Arr::get($credentials, $this->passwd()), $item->{$this->passwd()})) {
             throw ValidationException::withMessages([
@@ -74,9 +73,14 @@ class AuthJWTService implements Contracts\AuthJWTInterface
         unset($item->password);
         $itemArr = $item->toArray();
 
+        $payloadGenerateToken = [];
+        foreach ($this->payloadCredentials() as $payloadCredential) {
+            $payloadGenerateToken[$payloadCredential] = $itemArr[$payloadCredential];
+        }
+
         // Create jwt key
-        $payload = $this->jwt->make($itemArr)->toArray();
-        $payloadRefresh = $this->jwt->make($itemArr, true)->toArray();
+        $payload = $this->jwt->make($payloadGenerateToken)->toArray();
+        $payloadRefresh = $this->jwt->make($payloadGenerateToken, true)->toArray();
 
         if (is_callable($callback)) {
             $itemArr = call_user_func_array($callback, [$item, $payload['jti']]);

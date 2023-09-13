@@ -39,7 +39,7 @@ final class EloquentRepository implements RepositoryInterface
         return $this->model->where($attribute)->first();
     }
 
-    public function findByCredentials(array $credentials = [], array $conditions = [], array $columns = ['id'])
+    public function findByCredentials(array $credentials = [], array $conditions = [], array $columns = ['*'])
     {
         return $this->model
             ->select($columns)
