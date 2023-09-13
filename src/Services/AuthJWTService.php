@@ -75,9 +75,9 @@ class AuthJWTService implements Contracts\AuthJWTInterface
 
         $tokenPayload = [];
         foreach ($this->tokenPayloadFields() as $tokenPayloadField) {
-            if (!$itemArr[$tokenPayloadField]) {
+            if (!array_key_exists($tokenPayloadField, $itemArr)) {
                 throw ValidationException::withMessages([
-                    'message' => $this->getFailedLoginMessage(),
+                    'message' => $this->getInvalidConfigurationMessage(),
                 ]);
             }
             $tokenPayload[$tokenPayloadField] = $itemArr[$tokenPayloadField];
@@ -394,5 +394,15 @@ class AuthJWTService implements Contracts\AuthJWTInterface
         return Lang::has('validation.email')
             ? Lang::get('validation.email', ['attribute' => $email])
             : 'The email is invalid.';
+    }
+
+    /**
+     * @return string|\Symfony\Component\Translation\TranslatorInterface
+     */
+    protected function getInvalidConfigurationMessage(): string
+    {
+        return Lang::has('auth.invalid_configuration')
+            ? Lang::get('auth.invalid_configuration')
+            : 'Invalid auth configuration';
     }
 }
