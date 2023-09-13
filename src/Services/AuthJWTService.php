@@ -73,14 +73,19 @@ class AuthJWTService implements Contracts\AuthJWTInterface
         unset($item->password);
         $itemArr = $item->toArray();
 
-        $payloadGenerateToken = [];
-        foreach ($this->payloadCredentials() as $payloadCredential) {
-            $payloadGenerateToken[$payloadCredential] = $itemArr[$payloadCredential];
+        $tokenPayload = [];
+        foreach ($this->tokenPayloadFields() as $tokenPayloadField) {
+            if (!$itemArr[$tokenPayloadField]) {
+                throw ValidationException::withMessages([
+                    'message' => $this->getFailedLoginMessage(),
+                ]);
+            }
+            $tokenPayload[$tokenPayloadField] = $itemArr[$tokenPayloadField];
         }
 
         // Create jwt key
-        $payload = $this->jwt->make($payloadGenerateToken)->toArray();
-        $payloadRefresh = $this->jwt->make($payloadGenerateToken, true)->toArray();
+        $payload = $this->jwt->make($tokenPayload)->toArray();
+        $payloadRefresh = $this->jwt->make($tokenPayload, true)->toArray();
 
         if (is_callable($callback)) {
             $itemArr = call_user_func_array($callback, [$item, $payload['jti']]);
@@ -346,9 +351,9 @@ class AuthJWTService implements Contracts\AuthJWTInterface
      *
      * @return array
      */
-    protected function payloadCredentials(): array
+    protected function tokenPayloadFields(): array
     {
-        return $this->config['payload_credentials'] ?? [];
+        return $this->config['token_payload_fields'] ?? ['id'];
     }
 
     /**

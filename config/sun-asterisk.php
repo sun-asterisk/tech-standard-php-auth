@@ -24,14 +24,14 @@ return [
         ],
         /*
         |---------------------------------------------------------
-        | Attribute field_payload_credentials
+        | Attribute token_payload_fields
         |---------------------------------------------------------
         | Use the items in the list to create an access token
         | 
         | E.g. 'id or email'
         |
         */
-        'payload_credentials' => [
+        'token_payload_fields' => [
             'id',
             'email',
         ],
