@@ -110,7 +110,7 @@ final class AuthSessionServiceTest extends TestCase
         $service->expects($this->any())
             ->method('fieldCredentials')
             ->willReturn(['email']);
-    
+
         $model = Mockery::mock(Authenticatable::class)->makePartial();
         $model->passwd = '';
         Hash::shouldReceive('check')->once()->andReturn(true);
