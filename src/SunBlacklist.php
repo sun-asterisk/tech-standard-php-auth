@@ -35,15 +35,16 @@ class SunBlacklist
 
         // if expired less than now
         $valid = $payload['exp'];
-        $seconds = Carbon::now()->diffInSeconds(Carbon::createFromTimestamp($valid));
-        if ($seconds < 0) {
+        $now = Carbon::now();
+        if ($valid <= $now->timestamp) {
             return true;
         }
 
+        $diffInSeconds = $now->diffInSeconds(Carbon::createFromTimestamp($valid));
         $this->storage->add(
             $key,
             ['valid_until' => $valid],
-            $seconds,
+            $diffInSeconds,
         );
 
         return true;

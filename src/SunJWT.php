@@ -122,14 +122,12 @@ class SunJWT
 
     public function make(array $sub, $isRefresh = false): self
     {
-        if (empty($this->payload)) {
-            $now = Carbon::now();
-            $this->payload = [
-                'sub' => $sub,
-                'iat' => $now->timestamp,
-                'jti' => Str::random(6) . $now->timestamp,
-            ];
-        }
+        $now = Carbon::now();
+        $this->payload = [
+            'sub' => $sub,
+            'iat' => $now->timestamp,
+            'jti' => Str::random(6) . $now->getTimestampMs(),
+        ];
 
         $iat = $this->payload['iat'];
         $ttl = $isRefresh ? $this->rttl : $this->ttl;
