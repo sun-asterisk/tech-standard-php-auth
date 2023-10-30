@@ -35,6 +35,13 @@ class SunGuard implements Guard
     protected $request;
 
     /**
+     * The token mapper instance.
+     *
+     * @var \SunAsterisk\Auth\SunTokenMapper
+     */
+    protected $tokenMapper;
+
+    /**
      * Instantiate the class.
      *
      * @param  \SunAsterisk\Auth\SunJWT  $jwt
@@ -42,11 +49,16 @@ class SunGuard implements Guard
      * @param  \Illuminate\Http\Request  $request
      * @return void
      */
-    public function __construct(SunJWT $jwt, UserProvider $provider, Request $request)
-    {
+    public function __construct(
+        SunJWT $jwt,
+        UserProvider $provider,
+        Request $request,
+        SunTokenMapper $tokenMapper
+    ) {
         $this->jwt = $jwt;
         $this->provider = $provider;
         $this->request = $request;
+        $this->tokenMapper = $tokenMapper;
     }
 
     /**
@@ -167,7 +179,13 @@ class SunGuard implements Guard
     {
         try {
             $token = $this->request->bearerToken();
+            $rawToken = $this->jwt->decode($token);
+            $refreshToken = $this->tokenMapper->pullRefreshToken($rawToken['jti']);
+
             $this->jwt->invalidate($token);
+            if ($refreshToken) {
+                $this->jwt->invalidate($refreshToken, true);
+            }
         } catch (\Exception $e) {
             throw new Exceptions\JWTException($e->getMessage());
         }

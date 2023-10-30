@@ -44,4 +44,9 @@ final class Storage implements StorageInterface
     {
         return $this->cache->forget($key);
     }
+
+    public function pull(string $key): mixed
+    {
+        return $this->cache->pull($key);
+    }
 }
