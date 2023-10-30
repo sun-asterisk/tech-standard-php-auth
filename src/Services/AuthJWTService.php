@@ -14,6 +14,7 @@ use SunAsterisk\Auth\SunJWT;
 use SunAsterisk\Auth\Contracts;
 use SunAsterisk\Auth\Exceptions;
 use Carbon\Carbon;
+use SunAsterisk\Auth\SunTokenMapper;
 
 class AuthJWTService implements Contracts\AuthJWTInterface
 {
@@ -38,11 +39,21 @@ class AuthJWTService implements Contracts\AuthJWTInterface
      */
     private array $config = [];
 
-    public function __construct(Contracts\RepositoryInterface $repository, SunJWT $jwt, array $config = [])
-    {
+    /**
+     * @var \SunAsterisk\Auth\SunTokenMapper
+     */
+    protected $tokenMapper;
+
+    public function __construct(
+        Contracts\RepositoryInterface $repository,
+        SunJWT $jwt,
+        SunTokenMapper $tokenMapper,
+        array $config = []
+    ) {
         $this->repository = $repository;
         $this->config = $config;
         $this->jwt = $jwt;
+        $this->tokenMapper = $tokenMapper;
     }
 
     /**
@@ -64,7 +75,7 @@ class AuthJWTService implements Contracts\AuthJWTInterface
 
         $item = $this->repository->findByCredentials($fieldCredentials, $conditions);
 
-        if (! $item || ! Hash::check(Arr::get($credentials, $this->passwd()), $item->{$this->passwd()})) {
+        if (!$item || !Hash::check(Arr::get($credentials, $this->passwd()), $item->{$this->passwd()})) {
             throw ValidationException::withMessages([
                 'message' => $this->getFailedLoginMessage(),
             ]);
@@ -84,14 +95,16 @@ class AuthJWTService implements Contracts\AuthJWTInterface
         }
 
         // Create jwt key
-        $payload = $this->jwt->make($tokenPayload)->toArray();
         $payloadRefresh = $this->jwt->make($tokenPayload, true)->toArray();
+        $payload = $this->jwt->make($tokenPayload)->toArray();
 
         if (is_callable($callback)) {
             $itemArr = call_user_func_array($callback, [$item, $payload['jti']]);
         }
         $jwt = $this->jwt->encode($payload);
         $refresh = $this->jwt->encode($payloadRefresh, true);
+
+        $this->tokenMapper->add($payload, $refresh);
 
         return [
             'item' => $itemArr,
@@ -132,6 +145,8 @@ class AuthJWTService implements Contracts\AuthJWTInterface
 
             $payload = $this->jwt->make((array) $sub)->toArray();
             $jwt = $this->jwt->encode($payload);
+
+            $this->tokenMapper->add($payload, $refreshToken);
 
             return [
                 'refresh_token' => $refreshToken,

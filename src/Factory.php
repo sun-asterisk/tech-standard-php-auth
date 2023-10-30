@@ -2,6 +2,7 @@
 
 namespace SunAsterisk\Auth;
 
+use SunAsterisk\Auth\Contracts\StorageInterface;
 use Illuminate\Database\Eloquent\Model;
 use InvalidArgumentException;
 
@@ -13,14 +14,19 @@ final class Factory
     private array $config = [];
 
     /**
-     * @var SunAsterisk\Auth\SunBlacklist
+     * @var \SunAsterisk\Auth\SunBlacklist
      */
     private $blackList = null;
 
-     /**
+    /**
      * @var guard
      */
     private $guard = null;
+
+    /**
+     * @var \SunAsterisk\Auth\SunTokenMapper
+     */
+    private $tokenMapper = null;
 
     public function __construct()
     {
@@ -44,6 +50,13 @@ final class Factory
     public function withGuard($guard): self
     {
         $this->guard = $guard;
+
+        return $this;
+    }
+
+    public function withTokenMapper(StorageInterface $storage): self
+    {
+        $this->tokenMapper = new SunTokenMapper($storage);
 
         return $this;
     }
@@ -74,7 +87,12 @@ final class Factory
         // Create JWT
         $jwt = new SunJWT($this->blackList, $this->config['auth']);
 
-        return new Services\AuthJWTService($repository, $jwt, $this->config['auth']);
+        return new Services\AuthJWTService(
+            $repository,
+            $jwt,
+            $this->tokenMapper,
+            $this->config['auth']
+        );
     }
 
     public function createAuthSession(): Contracts\AuthSessionInterface
