@@ -19,7 +19,8 @@ class SunProjectManager
         $cacheProvider = $this->app->make(Providers\Storage::class);
         $factory = (new Factory)
             ->withConfig($config)
-            ->withBlacklist($cacheProvider);
+            ->withBlacklist($cacheProvider)
+            ->withTokenMapper($cacheProvider);
 
         return $factory->createAuthJWT();
     }

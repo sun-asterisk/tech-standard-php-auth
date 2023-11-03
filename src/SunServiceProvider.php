@@ -82,13 +82,16 @@ final class SunServiceProvider extends \Illuminate\Support\ServiceProvider
     protected function extendAuthGuard(): void
     {
         $this->app['auth']->extend('sun', function ($app, $name, array $config) {
-            $blackList = new SunBlacklist($app->make(Providers\Storage::class));
+            $storage = $app->make(Providers\Storage::class);
+            $blackList = new SunBlacklist($storage);
             $jwt = new SunJWT($blackList, $app->config->get('sun-asterisk.auth'));
+            $tokenMapper = new SunTokenMapper($storage);
 
             $guard = new SunGuard(
                 $jwt,
                 $app['auth']->createUserProvider($config['provider']),
-                $app['request']
+                $app['request'],
+                $tokenMapper
             );
             app()->refresh('request', $guard, 'setRequest');
 

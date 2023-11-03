@@ -33,4 +33,11 @@ interface StorageInterface
      * @return [bool]
      */
     public function destroy(string $key): bool;
+
+    /**
+     * [get]
+     * @param  string $key
+     * @return [mixed]
+     */
+    public function pull(string $key): mixed;
 }
