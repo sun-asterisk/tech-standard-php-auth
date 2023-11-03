@@ -14,27 +14,27 @@ Some of the features provided by Sun* Auth include user registration and login, 
 
 ---
 
-* [🔌 Installation](#-installation)
-    * [Laravel](#-laravel)
-    * [Lumen](#-lumen)
-    * [Other](#-other)
-* [🔎 Usage](#-usage)
-    * [Configure Auth guard](#-configure-auth-guard)
-    * [Injection dependencies use JWT](#-injection-dependencies-use-JWT)
-    * [Injection dependencies use Session](#-injection-dependencies-use-Session)
-    * [Login](#-login)
-    * [Logout](#-logout)
-    * [Register](#-register)
-    * [Forgot password](#-forgot-password)
-    * [Refresh token](#-refresh-token)
-    * [Social Login custom](#-social-login-custom)
-* [ ⚡ Architecture](#-architecture)
-    * [Login](#-architecture-login)
-    * [Logout](#-architecture-logout)
-    * [Register](#-architecture-register)
-    * [Forgot password](#-architecture-forgot-password)
-    * [Refresh token](#-architecture-refresh-token)
-    * [Social Login custom](#-architecture-social-login-custom)
+* [🔌 Installation](#installation)
+    * [Laravel](#laravel)
+    * [Lumen](#lumen)
+    * [Other](#other)
+* [🔎 Usage](#usage)
+    * [Configure Auth guard](#configure-auth-guard)
+    * [Injection dependencies use JWT](#injection-dependencies-use-jwt)
+    * [Injection dependencies use Session](#injection-dependencies-use-session)
+    * [Login](#login)
+    * [Logout](#logout)
+    * [Register](#register)
+    * [Forgot password](#forgot-password)
+    * [Refresh token](#refresh-token)
+    * [Social Login custom](#social-login-custom)
+* [ ⚡ Architecture](#architecture)
+    * [Login](#architecture-login)
+    * [Logout](#architecture-logout)
+    * [Register](#architecture-register)
+    * [Forgot password](#architecture-forgot-password)
+    * [Refresh token](#architecture-refresh-token)
+    * [Social Login custom](#architecture-social-login-custom)
 
 ---
 
@@ -259,7 +259,7 @@ Route::group([
 }
 ```
 
- #### Injection dependencies use JWT
+#### Injection dependencies use JWT
 
 ```bash
 <?php
