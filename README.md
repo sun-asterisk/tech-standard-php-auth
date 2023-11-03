@@ -927,6 +927,8 @@ public function login(array $credentials = [], ?array $attributes = [], ?callabl
 
     $jwt = $this->jwt->encode($payload);
     $refresh = $this->jwt->encode($payloadRefresh, true);
+
+    $this->tokenMapper->add($payload, $refresh);
 }
 ```
 Method login will return an array
@@ -989,20 +991,21 @@ Explain
 protected function extendAuthGuard(): void
 {
     $this->app['auth']->extend('sun', function ($app, $name, array $config) {
-        // Create Blacklist instance
-        $blackList = new SunBlacklist($app->make(Providers\Storage::class));
-        // Create SunJWT instance
-        $jwt = new SunJWT($blackList, $app->config->get('sun-asterisk.auth'));
-        // Create SunGuard instance
-        $guard = new SunGuard(
-            $jwt,
-            $app['auth']->createUserProvider($config['provider']),
-            $app['request']
-        );
-        app()->refresh('request', $guard, 'setRequest');
+    $storage = $app->make(Providers\Storage::class);
+    $blackList = new SunBlacklist($storage);
+    $jwt = new SunJWT($blackList, $app->config->get('sun-asterisk.auth'));
+    $tokenMapper = new SunTokenMapper($storage);
 
-        return $guard;
-    });
+    $guard = new SunGuard(
+        $jwt,
+        $app['auth']->createUserProvider($config['provider']),
+        $app['request'],
+        $tokenMapper
+    );
+    app()->refresh('request', $guard, 'setRequest');
+
+    return $guard;
+});
 }
 ```
 
@@ -1019,7 +1022,13 @@ public function logout()
 {
     try {
         $token = $this->request->bearerToken();
+        $rawToken = $this->jwt->decode($token);
+        $refreshToken = $this->tokenMapper->pullRefreshToken($rawToken['jti']);
+
         $this->jwt->invalidate($token);
+        if ($refreshToken) {
+            $this->jwt->invalidate($refreshToken, true);
+        }
     } catch (\Exception $e) {
         throw new Exceptions\JWTException($e->getMessage());
     }
@@ -1311,10 +1320,9 @@ public function refresh(?string $refreshToken, callable $callback = null): array
 {
     ...
     $payload = $this->jwt->make((array) $sub)->toArray();
-    $payloadRefresh = $this->jwt->make((array) $sub, true)->toArray();
-
     $jwt = $this->jwt->encode($payload);
-    $refresh = $this->jwt->encode($payloadRefresh, true);
+
+    $this->tokenMapper->add($payload, $refreshToken);
 }
 ```
 Method refresh will return an array
