@@ -27,11 +27,15 @@ class SunTokenMapper
     public function add(array $accessTokenPayload, string $refreshToken)
     {
         $cacheKey = $this->getKey($accessTokenPayload['jti']);
-        if ($this->storage->has($cacheKey)) return;
+        if ($this->storage->has($cacheKey)) {
+            return;
+        }
 
         $valid = $accessTokenPayload['exp'];
         $now = Carbon::now();
-        if ($valid <= $now->timestamp) return;
+        if ($valid <= $now->timestamp) {
+            return;
+        }
 
         $diffInSeconds = $now->diffInSeconds(Carbon::createFromTimestamp($valid));
         $this->storage->add(

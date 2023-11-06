@@ -2,18 +2,19 @@
 
 namespace SunAsterisk\Auth\Tests\Services;
 
-use SunAsterisk\Auth\Tests\TestCase;
-use SunAsterisk\Auth\Contracts\RepositoryInterface;
+use Mockery;
+use Carbon\Carbon;
 use SunAsterisk\Auth\SunJWT;
-use Illuminate\Contracts\Validation\Validator;
-use Illuminate\Support\Facades\Validator as ValidatorFacade;
-use SunAsterisk\Auth\Services\AuthJWTService;
-use Illuminate\Database\Eloquent\Model;
+use SunAsterisk\Auth\Tests\TestCase;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Lang;
-use Carbon\Carbon;
-use Mockery;
+use SunAsterisk\Auth\SunTokenMapper;
+use Illuminate\Database\Eloquent\Model;
+use SunAsterisk\Auth\Services\AuthJWTService;
+use Illuminate\Contracts\Validation\Validator;
+use SunAsterisk\Auth\Contracts\RepositoryInterface;
+use Illuminate\Support\Facades\Validator as ValidatorFacade;
 
 /**
  * @covers \SunAsterisk\Auth\Services\AuthJWTService
@@ -22,12 +23,14 @@ final class AuthJWTServiceTest extends TestCase
 {
     protected $repository;
     protected $jwt;
+    protected $tokenMapper;
 
     protected function setUp(): void
     {
         parent::setUp();
         $this->repository = Mockery::mock(RepositoryInterface::class)->makePartial();
         $this->jwt = Mockery::mock(SunJWT::class)->makePartial();
+        $this->tokenMapper = Mockery::mock(SunTokenMapper::class)->makePartial();
     }
 
     protected function tearDown(): void
@@ -42,6 +45,7 @@ final class AuthJWTServiceTest extends TestCase
             ->setConstructorArgs([
                 $this->repository,
                 $this->jwt,
+                $this->tokenMapper,
                 [],
             ])
             ->setMethods([
@@ -90,6 +94,7 @@ final class AuthJWTServiceTest extends TestCase
             ->setConstructorArgs([
                 $this->repository,
                 $this->jwt,
+                $this->tokenMapper,
                 [],
             ])
             ->setMethods([
@@ -127,7 +132,7 @@ final class AuthJWTServiceTest extends TestCase
         $model->shouldReceive('getAttributes')
             ->once()
             ->andReturn([
-                'id' => 1, 
+                'id' => 1,
                 'email' => 'email',
             ]);
         Hash::shouldReceive('check')->once()->andReturn(true);
@@ -144,6 +149,11 @@ final class AuthJWTServiceTest extends TestCase
             ->once()
             ->with(['email' => 'username_val'], [])
             ->andReturn($model);
+
+        $this->tokenMapper
+            ->shouldReceive('add')
+            ->once()
+            ->andReturn('secret_key');
 
         $actual = $service->login(
             [
@@ -173,6 +183,7 @@ final class AuthJWTServiceTest extends TestCase
             ->setConstructorArgs([
                 $this->repository,
                 $this->jwt,
+                $this->tokenMapper,
                 [],
             ])
             ->setMethods()
@@ -192,6 +203,7 @@ final class AuthJWTServiceTest extends TestCase
             ->setConstructorArgs([
                 $this->repository,
                 $this->jwt,
+                $this->tokenMapper,
                 [],
             ])
             ->setMethods()
@@ -213,6 +225,7 @@ final class AuthJWTServiceTest extends TestCase
             ->setConstructorArgs([
                 $this->repository,
                 $this->jwt,
+                $this->tokenMapper,
                 [],
             ])
             ->setMethods()
@@ -242,6 +255,7 @@ final class AuthJWTServiceTest extends TestCase
             ->setConstructorArgs([
                 $this->repository,
                 $this->jwt,
+                $this->tokenMapper,
                 [],
             ])
             ->setMethods()
@@ -262,6 +276,11 @@ final class AuthJWTServiceTest extends TestCase
             ->andReturn($model);
         $this->jwt->shouldReceive('make->toArray')->once()->andReturn(['exp' => $exp]);
         $this->jwt->shouldReceive('encode')->once()->with(['exp' => $exp])->andReturn('secret_key');
+        $this->tokenMapper
+            ->shouldReceive('add')
+            ->once()
+            ->with(['exp' => $exp], 'refresh_token')
+            ->andReturn('secret_key');
 
         $actual = $service->refresh('refresh_token', function () { });
 
@@ -281,6 +300,7 @@ final class AuthJWTServiceTest extends TestCase
             ->setConstructorArgs([
                 $this->repository,
                 $this->jwt,
+                $this->tokenMapper,
                 [],
             ])
             ->setMethods()
@@ -300,6 +320,7 @@ final class AuthJWTServiceTest extends TestCase
             ->setConstructorArgs([
                 $this->repository,
                 $this->jwt,
+                $this->tokenMapper,
                 [],
             ])
             ->setMethods()
@@ -316,6 +337,7 @@ final class AuthJWTServiceTest extends TestCase
             ->setConstructorArgs([
                 $this->repository,
                 $this->jwt,
+                $this->tokenMapper,
                 [],
             ])
             ->setMethods([
@@ -372,6 +394,7 @@ final class AuthJWTServiceTest extends TestCase
             ->setConstructorArgs([
                 $this->repository,
                 $this->jwt,
+                $this->tokenMapper,
                 [],
             ])
             ->setMethods()
@@ -394,6 +417,7 @@ final class AuthJWTServiceTest extends TestCase
             ->setConstructorArgs([
                 $this->repository,
                 $this->jwt,
+                $this->tokenMapper,
                 [],
             ])
             ->setMethods()
@@ -424,6 +448,7 @@ final class AuthJWTServiceTest extends TestCase
             ->setConstructorArgs([
                 $this->repository,
                 $this->jwt,
+                $this->tokenMapper,
                 [],
             ])
             ->setMethods()
@@ -454,6 +479,7 @@ final class AuthJWTServiceTest extends TestCase
             ->setConstructorArgs([
                 $this->repository,
                 $this->jwt,
+                $this->tokenMapper,
                 [],
             ])
             ->setMethods([
@@ -498,6 +524,7 @@ final class AuthJWTServiceTest extends TestCase
             ->setConstructorArgs([
                 $this->repository,
                 $this->jwt,
+                $this->tokenMapper,
                 [],
             ])
             ->setMethods([
@@ -533,6 +560,7 @@ final class AuthJWTServiceTest extends TestCase
             ->setConstructorArgs([
                 $this->repository,
                 $this->jwt,
+                $this->tokenMapper,
                 [],
             ])
             ->setMethods()
@@ -558,6 +586,7 @@ final class AuthJWTServiceTest extends TestCase
             ->setConstructorArgs([
                 $this->repository,
                 $this->jwt,
+                $this->tokenMapper,
                 ['token_expires' => 10],
             ])
             ->setMethods()
@@ -588,6 +617,7 @@ final class AuthJWTServiceTest extends TestCase
             ->setConstructorArgs([
                 $this->repository,
                 $this->jwt,
+                $this->tokenMapper,
                 ['token_expires' => 10],
             ])
             ->setMethods()
@@ -607,6 +637,7 @@ final class AuthJWTServiceTest extends TestCase
             ->setConstructorArgs([
                 $this->repository,
                 $this->jwt,
+                $this->tokenMapper,
                 ['token_expires' => 30],
             ])
             ->setMethods()
@@ -636,6 +667,7 @@ final class AuthJWTServiceTest extends TestCase
             ->setConstructorArgs([
                 $this->repository,
                 $this->jwt,
+                $this->tokenMapper,
                 [],
             ])
             ->setMethods([
@@ -670,6 +702,7 @@ final class AuthJWTServiceTest extends TestCase
             ->setConstructorArgs([
                 $this->repository,
                 $this->jwt,
+                $this->tokenMapper,
                 ['field_credentials' => ['field']],
             ])
             ->setMethods()
@@ -685,6 +718,7 @@ final class AuthJWTServiceTest extends TestCase
             ->setConstructorArgs([
                 $this->repository,
                 $this->jwt,
+                $this->tokenMapper,
                 ['login_username' => 'username'],
             ])
             ->setMethods()
@@ -700,6 +734,7 @@ final class AuthJWTServiceTest extends TestCase
             ->setConstructorArgs([
                 $this->repository,
                 $this->jwt,
+                $this->tokenMapper,
                 ['login_password' => 'password'],
             ])
             ->setMethods()
@@ -715,6 +750,7 @@ final class AuthJWTServiceTest extends TestCase
             ->setConstructorArgs([
                 $this->repository,
                 $this->jwt,
+                $this->tokenMapper,
                 [],
             ])
             ->setMethods()
@@ -731,6 +767,7 @@ final class AuthJWTServiceTest extends TestCase
             ->setConstructorArgs([
                 $this->repository,
                 $this->jwt,
+                $this->tokenMapper,
                 [],
             ])
             ->setMethods()
@@ -748,6 +785,7 @@ final class AuthJWTServiceTest extends TestCase
             ->setConstructorArgs([
                 $this->repository,
                 $this->jwt,
+                $this->tokenMapper,
                 [],
             ])
             ->setMethods()
@@ -764,12 +802,16 @@ final class AuthJWTServiceTest extends TestCase
             ->setConstructorArgs([
                 $this->repository,
                 $this->jwt,
+                $this->tokenMapper,
                 [],
             ])
             ->setMethods()
             ->getMock();
         Lang::shouldReceive('has')->once()->andReturn(true);
-        Lang::shouldReceive('get')->with('validation.email', ['attribute' => 'email'])->once()->andReturn('validation_email');
+        Lang::shouldReceive('get')
+            ->with('validation.email', ['attribute' => 'email'])
+            ->once()
+            ->andReturn('validation_email');
 
         $equal = $this->callMethodProtectedOrPrivate($service, 'getEmailInvalidMessage', ['email']);
         $this->assertEquals($equal, 'validation_email');
