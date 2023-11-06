@@ -79,7 +79,8 @@ final class AuthJWTServiceTest extends TestCase
             ->once()
             ->with(['email' => 'username_val'], [])
             ->andReturn(null);
-        $this->expectException(\BadMethodCallException::class);
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('A facade root has not been set.');
 
         $service->login(
             ['username' => 'username_val'],
@@ -435,7 +436,8 @@ final class AuthJWTServiceTest extends TestCase
             ->with(['email' => 'email'])
             ->andReturn(null);
 
-        $this->expectException(\BadMethodCallException::class);
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('A facade root has not been set.');
 
         $service->postForgotPassword('email');
     }
