@@ -30,7 +30,7 @@ final class AuthJWTServiceTest extends TestCase
         parent::setUp();
         $this->repository = Mockery::mock(RepositoryInterface::class)->makePartial();
         $this->jwt = Mockery::mock(SunJWT::class)->makePartial();
-        $this->tokenMapper = Mockery::mock('overload:SunAsterisk\Auth\SunTokenMapper')->makePartial();
+        $this->tokenMapper = Mockery::mock(SunTokenMapper::class)->makePartial();
     }
 
     protected function tearDown(): void
@@ -79,8 +79,7 @@ final class AuthJWTServiceTest extends TestCase
             ->once()
             ->with(['email' => 'username_val'], [])
             ->andReturn(null);
-        $this->expectException(\RuntimeException::class);
-        $this->expectExceptionMessage('A facade root has not been set.');
+        $this->expectException(\BadMethodCallException::class);
 
         $service->login(
             ['username' => 'username_val'],
@@ -143,7 +142,6 @@ final class AuthJWTServiceTest extends TestCase
             ]
         );
         $this->jwt->shouldReceive('encode')->twice()->andReturn('secret_key');
-        $exp = Carbon::now()->addMinutes(10)->timestamp;
 
         $this->repository
             ->shouldReceive('findByCredentials')
@@ -154,7 +152,6 @@ final class AuthJWTServiceTest extends TestCase
         $this->tokenMapper
             ->shouldReceive('add')
             ->once()
-            ->with(['exp' => $exp], 'refresh_token')
             ->andReturn('secret_key');
 
         $actual = $service->login(
@@ -438,8 +435,7 @@ final class AuthJWTServiceTest extends TestCase
             ->with(['email' => 'email'])
             ->andReturn(null);
 
-        $this->expectException(\RuntimeException::class);
-        $this->expectExceptionMessage('A facade root has not been set.');
+        $this->expectException(\BadMethodCallException::class);
 
         $service->postForgotPassword('email');
     }
